@@ -11,6 +11,7 @@ import androidx.appcompat.widget.Toolbar;
 import com.example.chatbasicoprojecto.databinding.ActivityMainBinding;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -34,6 +35,18 @@ public class MainActivity extends AppCompatActivity {
             getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
 
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        FirebaseUser currentUser = mAuth.getCurrentUser();
+        if (currentUser == null) {
+            // User is signed in
+            Intent intent = new Intent(MainActivity.this, Login.class);
+            startActivity(intent);
+            finish();
+        }
     }
 
     public void logout(View view) {
