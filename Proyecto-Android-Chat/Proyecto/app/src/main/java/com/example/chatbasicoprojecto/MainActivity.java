@@ -12,11 +12,13 @@ import com.example.chatbasicoprojecto.databinding.ActivityMainBinding;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class MainActivity extends AppCompatActivity {
 
     private ActivityMainBinding binding;
     private FirebaseAuth mAuth;
+    private FirebaseDatabase database = FirebaseDatabase.getInstance("https://androidchatfb-53eb6-default-rtdb.firebaseio.com/");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +49,10 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent);
             finish();
         }
+    }
+
+    public void addContact(View view){
+        Toast.makeText(MainActivity.this, "hola", Toast.LENGTH_SHORT).show();
     }
 
     public void logout(View view) {

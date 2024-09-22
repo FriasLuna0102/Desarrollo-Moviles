@@ -34,20 +34,34 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <Button
-                android:id="@+id/logout_button"
-                android:layout_width="wrap_content"
+                android:id="@+id/addContact"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:background="?attr/selectableItemBackground"
-                android:onClick="logout"
-                android:text="Logout"
-                android:textColor="@android:color/white"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                android:layout_marginStart="215dp"
+                android:layout_marginTop="4dp"
+                android:onClick="addContact"
+                android:text="Add"
+                app:layout_constraintStart_toEndOf="@+id/toolbar_title"
+                app:layout_constraintTop_toTopOf="parent"
+                />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.appcompat.widget.Toolbar>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/contactList"
+        android:layout_width="409dp"
+        android:layout_height="673dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar"
+        tools:listitem="@android:layout/list_content" />
 
     <!-- Aquí puedes agregar el resto del contenido de tu MainActivity -->
 
