@@ -11,6 +11,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
 import com.example.chatbasicoprojecto.databinding.ActivityMainBinding;
+import com.example.chatbasicoprojecto.encapsulaciones.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseApp;
@@ -25,7 +26,8 @@ public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
     private FirebaseAuth mAuth;
     private FirebaseDatabase database = FirebaseDatabase.getInstance();
-    private DatabaseReference databaseReference = database.getReference("contacts");
+    private DatabaseReference databaseReference = database.getReference();
+    private User usuario;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,16 +38,19 @@ public class MainActivity extends AppCompatActivity {
 
         FirebaseApp.initializeApp(this);
         mAuth = FirebaseAuth.getInstance();
-        System.out.println(database.getReference().child("users").get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+
+        databaseReference.child("users").child(mAuth.getCurrentUser().getEmail().substring(0, mAuth.getCurrentUser().getEmail().indexOf("@")))
+                .get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DataSnapshot> task) {
-                if (!task.isSuccessful()) {
-                    Log.e("firebase", "error getting data", task.getException());
+                if (task.isSuccessful()){
+
+                    // usuario = (User) task.getResult().getValue();
                 }else {
-                    Log.e("firebase", String.valueOf(task.getResult().getValue()));
+                    Log.e("No se pudo encontrar el usuario", String.valueOf(task.getResult().getValue()));
                 }
             }
-        }));
+        });
 
         // Setup toolbar
         Toolbar toolbar = binding.toolbar;
