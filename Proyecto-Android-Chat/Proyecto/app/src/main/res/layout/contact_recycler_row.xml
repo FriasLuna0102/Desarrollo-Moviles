@@ -2,12 +2,12 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="0dp"
     android:background="@color/colorAccent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:layout_marginBottom="1dp">
 
     <TextView
-        android:id="@+id/username"
+        android:id="@+id/username_add_contact"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
@@ -18,7 +18,7 @@
         android:textStyle="bold" />
 
     <TextView
-        android:id="@+id/email"
+        android:id="@+id/email_add_contact"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_weight="1"
