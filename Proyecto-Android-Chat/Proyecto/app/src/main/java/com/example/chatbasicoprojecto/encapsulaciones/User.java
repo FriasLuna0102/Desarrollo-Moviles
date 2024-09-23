@@ -9,9 +9,9 @@ public class User {
 
     public User() {}
 
-    public User(String email, String username) {
+    public User(String email) {
         this.email = email;
-        this.username = username.substring(0, username.indexOf('@'));
+        this.username = email.substring(0, email.indexOf('@'));
     }
 
     public String getEmail() {

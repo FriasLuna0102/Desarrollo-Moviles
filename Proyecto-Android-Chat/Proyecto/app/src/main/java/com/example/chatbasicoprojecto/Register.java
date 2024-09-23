@@ -72,7 +72,7 @@ public class Register extends AppCompatActivity {
                         if (task.isSuccessful()) {
                             Log.d(TAG, "createUserWithEmail:success");
 
-                            User user = new User(email, email);
+                            User user = new User(email);
                             Contacto contacto = new Contacto(email);
                             databaseReference.child("users").child(email.substring(0, email.indexOf("@"))).setValue(user);
                             databaseReference.child("contactos").child(email.substring(0, email.indexOf("@"))).setValue(contacto);
