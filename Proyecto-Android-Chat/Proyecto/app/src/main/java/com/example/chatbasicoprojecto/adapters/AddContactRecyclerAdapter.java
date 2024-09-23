@@ -12,9 +12,11 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.chatbasicoprojecto.R;
+import com.example.chatbasicoprojecto.encapsulaciones.Contacto;
 import com.example.chatbasicoprojecto.encapsulaciones.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -27,6 +29,7 @@ public class AddContactRecyclerAdapter extends RecyclerView.Adapter<AddContactRe
     private FirebaseDatabase database = FirebaseDatabase.getInstance();
     private DatabaseReference databaseReference = database.getReference();
     private List<User> userList = new ArrayList<>();
+    private List<String> emailOfAddedContacts = new ArrayList<>();
     private OnItemClickListener onClickListener;
 
     public interface OnItemClickListener {
@@ -35,10 +38,27 @@ public class AddContactRecyclerAdapter extends RecyclerView.Adapter<AddContactRe
 
     public AddContactRecyclerAdapter(OnItemClickListener onClickListener) {
         this.onClickListener = onClickListener;
-        fetchContacts();
+        fetchAvailableContacts();
     }
 
-    private void fetchContacts() {
+    private void fetchAvailableContacts() {
+        FirebaseAuth mAuth = FirebaseAuth.getInstance();
+        String userEmail = mAuth.getCurrentUser().getEmail();
+        String username = userEmail.substring(0, userEmail.indexOf("@"));
+
+        databaseReference.child("contactos").child(username).get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DataSnapshot> task) {
+                if (task.isSuccessful()){
+                    System.out.println(task.getResult().getValue(Contacto.class).getContactsEmail());
+                    emailOfAddedContacts = task.getResult().getValue(Contacto.class).getContactsEmail();
+                    notifyDataSetChanged();
+                }else {
+                    Log.e("Error user contacts", String.valueOf(task.getResult().getValue()));
+                }
+            }
+        });
+
         databaseReference.child("users").get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DataSnapshot> task) {
@@ -46,7 +66,9 @@ public class AddContactRecyclerAdapter extends RecyclerView.Adapter<AddContactRe
                     DataSnapshot dataSnapshot = task.getResult();
                     for (DataSnapshot snapshot: dataSnapshot.getChildren()) {
                         String email = snapshot.child("email").getValue(String.class);
-                        userList.add(new User(email));
+                        if (emailOfAddedContacts == null || !emailOfAddedContacts.contains(email)){
+                            userList.add(new User(email));
+                        }
                     }
                     notifyDataSetChanged();
                 }else {
