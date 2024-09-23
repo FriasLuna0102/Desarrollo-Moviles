@@ -25,6 +25,7 @@
                 android:id="@+id/toolbar_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:onClick="logout"
                 android:text="My App"
                 android:textColor="@android:color/white"
                 android:textSize="20sp"

@@ -1,5 +1,6 @@
 [versions]
 agp = "8.6.0"
+firebaseAdmin = "9.2.0"
 firebaseBom = "33.3.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
@@ -14,6 +15,7 @@ lifecycleViewmodelKtx = "2.8.5"
 firebaseAuth = "23.0.0"
 
 [libraries]
+firebase-admin = { module = "com.google.firebase:firebase-admin", version.ref = "firebaseAdmin" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 firebase-database = { module = "com.google.firebase:firebase-database" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
