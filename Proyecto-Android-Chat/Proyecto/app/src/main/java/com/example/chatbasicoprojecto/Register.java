@@ -13,6 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.chatbasicoprojecto.databinding.ActivityRegisterBinding;
+import com.example.chatbasicoprojecto.encapsulaciones.Contacto;
 import com.example.chatbasicoprojecto.encapsulaciones.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -70,8 +71,12 @@ public class Register extends AppCompatActivity {
                         progressBar.setVisibility(View.GONE);
                         if (task.isSuccessful()) {
                             Log.d(TAG, "createUserWithEmail:success");
+
                             User user = new User(email, email);
+                            Contacto contacto = new Contacto(email);
                             databaseReference.child("users").child(email.substring(0, email.indexOf("@"))).setValue(user);
+                            databaseReference.child("contactos").child(email.substring(0, email.indexOf("@"))).setValue(contacto);
+
                             Toast.makeText(Register.this, "Registration successful.",
                                     Toast.LENGTH_SHORT).show();
                             Intent login = new Intent(Register.this, Login.class);
