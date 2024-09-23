@@ -1,10 +1,13 @@
 package com.example.chatbasicoprojecto;
 
+import static android.app.PendingIntent.getActivity;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.PixelCopy;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
@@ -27,7 +30,7 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.Objects;
 
-public class AddContact extends AppCompatActivity {
+public class AddContact extends AppCompatActivity implements AddContactRecyclerAdapter.OnItemClickListener {
     FirebaseAuth mAuth;
     private FirebaseDatabase database = FirebaseDatabase.getInstance();
     private DatabaseReference databaseReference = database.getReference();
@@ -55,12 +58,18 @@ public class AddContact extends AppCompatActivity {
     }
 
     public void listarUsuariosNoAgregados(){
-        addContactRecyclerAdapter = new AddContactRecyclerAdapter();
+        addContactRecyclerAdapter = new AddContactRecyclerAdapter(this);
         recyclerView.setAdapter(addContactRecyclerAdapter);
     }
 
     public void volverToMain(View view){
         Intent intent = new Intent(this, MainActivity.class);
         startActivity(intent);
+    }
+
+    @Override
+    public void onClick(int position, String email) {
+        Toast toast = Toast.makeText(AddContact.this,"CLICKED " + email,Toast.LENGTH_SHORT);
+        toast.show();
     }
 }

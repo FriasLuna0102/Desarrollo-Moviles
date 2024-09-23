@@ -5,6 +5,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -26,8 +27,14 @@ public class AddContactRecyclerAdapter extends RecyclerView.Adapter<AddContactRe
     private FirebaseDatabase database = FirebaseDatabase.getInstance();
     private DatabaseReference databaseReference = database.getReference();
     private List<User> userList = new ArrayList<>();
+    private OnItemClickListener onClickListener;
 
-    public AddContactRecyclerAdapter() {
+    public interface OnItemClickListener {
+        void onClick(int position, String email);
+    }
+
+    public AddContactRecyclerAdapter(OnItemClickListener onClickListener) {
+        this.onClickListener = onClickListener;
         fetchContacts();
     }
 
@@ -49,14 +56,22 @@ public class AddContactRecyclerAdapter extends RecyclerView.Adapter<AddContactRe
         });
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
+    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         TextView username;
         TextView email;
+        OnItemClickListener onItemClickListener;
 
-        public ViewHolder(@NonNull View view){
+        public ViewHolder(@NonNull View view, OnItemClickListener onItemClickListener){
             super(view);
             this.username = view.findViewById(R.id.username_add_contact);
             this.email = view.findViewById(R.id.email_add_contact);
+            view.setOnClickListener(this);
+            this.onItemClickListener = onItemClickListener;
+        }
+
+        @Override
+        public void onClick(View view) {
+            this.onItemClickListener.onClick(getAdapterPosition(), email.getText().toString());
         }
     }
 
@@ -64,7 +79,8 @@ public class AddContactRecyclerAdapter extends RecyclerView.Adapter<AddContactRe
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.contact_recycler_row, parent, false);
-        return new ViewHolder(view);
+
+        return new ViewHolder(view, this.onClickListener);
     }
 
     @Override
