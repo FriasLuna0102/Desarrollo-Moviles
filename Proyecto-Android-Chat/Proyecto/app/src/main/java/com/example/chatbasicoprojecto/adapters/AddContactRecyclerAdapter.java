@@ -31,6 +31,9 @@ public class AddContactRecyclerAdapter extends RecyclerView.Adapter<AddContactRe
     private List<User> userList = new ArrayList<>();
     private List<String> emailOfAddedContacts = new ArrayList<>();
     private OnItemClickListener onClickListener;
+    private FirebaseAuth mAuth = FirebaseAuth.getInstance();
+    private String userEmail = mAuth.getCurrentUser().getEmail();
+    private String username = userEmail.substring(0, userEmail.indexOf("@"));
 
     public interface OnItemClickListener {
         void onClick(int position, String email);
@@ -42,9 +45,6 @@ public class AddContactRecyclerAdapter extends RecyclerView.Adapter<AddContactRe
     }
 
     private void fetchAvailableContacts() {
-        FirebaseAuth mAuth = FirebaseAuth.getInstance();
-        String userEmail = mAuth.getCurrentUser().getEmail();
-        String username = userEmail.substring(0, userEmail.indexOf("@"));
 
         databaseReference.child("contactos").child(username).get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
             @Override
