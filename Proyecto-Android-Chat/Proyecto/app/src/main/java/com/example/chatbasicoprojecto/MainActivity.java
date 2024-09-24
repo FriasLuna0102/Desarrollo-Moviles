@@ -101,5 +101,7 @@ public class MainActivity extends AppCompatActivity implements ListContactRecycl
     public void onClick(int position, String username, String email) {
         Toast toast = Toast.makeText(MainActivity.this, "click " + username, Toast.LENGTH_SHORT);
         toast.show();
+        Intent intent = new Intent(this, PrivateChatActivity.class);
+        startActivity(intent);
     }
 }
