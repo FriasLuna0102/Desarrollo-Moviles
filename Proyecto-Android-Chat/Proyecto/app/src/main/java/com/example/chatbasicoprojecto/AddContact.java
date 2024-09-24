@@ -98,5 +98,6 @@ public class AddContact extends AppCompatActivity implements AddContactRecyclerA
             } else {
                 Log.e("DatabaseError", "Failed to retrieve contact", task.getException());
             }
-        });    }
+        });
+    }
 }
