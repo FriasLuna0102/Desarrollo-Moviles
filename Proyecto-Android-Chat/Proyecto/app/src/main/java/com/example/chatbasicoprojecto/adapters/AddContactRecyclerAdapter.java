@@ -53,8 +53,6 @@ public class AddContactRecyclerAdapter extends RecyclerView.Adapter<AddContactRe
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 List<String> contactos = snapshot.child("contactos").child(username).getValue(Contacto.class).getContactsEmail();
                 emailOfAddedContacts = contactos;
-                System.out.println(emailOfAddedContacts);
-                System.out.println("holaaaaaaaaaaaaaaa");
                 notifyDataSetChanged();
             }
 
@@ -71,7 +69,6 @@ public class AddContactRecyclerAdapter extends RecyclerView.Adapter<AddContactRe
                 userList.clear();
                 for (DataSnapshot data : snapshot.child("users").getChildren()){
                     String email = data.child("email").getValue(String.class);
-                    System.out.println(email);
                     if (emailOfAddedContacts == null || !emailOfAddedContacts.contains(email)) {
                         userList.add(new User(email));
                     }
