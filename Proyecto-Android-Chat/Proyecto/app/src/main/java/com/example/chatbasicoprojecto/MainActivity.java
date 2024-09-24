@@ -9,7 +9,10 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.chatbasicoprojecto.adapters.ListContactRecyclerAdapter;
 import com.example.chatbasicoprojecto.databinding.ActivityMainBinding;
 import com.example.chatbasicoprojecto.encapsulaciones.User;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -28,6 +31,8 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseDatabase database = FirebaseDatabase.getInstance();
     private DatabaseReference databaseReference = database.getReference();
     private User usuario;
+    private RecyclerView recyclerView;
+    private ListContactRecyclerAdapter listContactRecyclerAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,6 +63,11 @@ public class MainActivity extends AppCompatActivity {
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
+
+        recyclerView = findViewById(R.id.mainList);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        listContactRecyclerAdapter = new ListContactRecyclerAdapter();
+        recyclerView.setAdapter(listContactRecyclerAdapter);
 
     }
 
