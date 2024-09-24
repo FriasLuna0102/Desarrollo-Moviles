@@ -73,6 +73,7 @@ public class AddContactRecyclerAdapter extends RecyclerView.Adapter<AddContactRe
                         userList.add(new User(email));
                     }
                 }
+                notifyDataSetChanged();
             }
 
             @Override

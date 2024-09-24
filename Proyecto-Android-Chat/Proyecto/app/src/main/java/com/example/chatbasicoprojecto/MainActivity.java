@@ -24,7 +24,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements ListContactRecyclerAdapter.OnItemClickListener{
 
     private ActivityMainBinding binding;
     private FirebaseAuth mAuth;
@@ -66,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
 
         recyclerView = findViewById(R.id.mainList);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        listContactRecyclerAdapter = new ListContactRecyclerAdapter();
+        listContactRecyclerAdapter = new ListContactRecyclerAdapter(this);
         recyclerView.setAdapter(listContactRecyclerAdapter);
 
     }
@@ -95,5 +95,11 @@ public class MainActivity extends AppCompatActivity {
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
         finish();
+    }
+
+    @Override
+    public void onClick(int position, String username, String email) {
+        Toast toast = Toast.makeText(MainActivity.this, "click " + username, Toast.LENGTH_SHORT);
+        toast.show();
     }
 }
