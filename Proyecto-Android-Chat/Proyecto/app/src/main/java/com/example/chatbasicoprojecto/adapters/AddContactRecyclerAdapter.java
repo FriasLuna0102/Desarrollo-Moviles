@@ -18,8 +18,10 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,36 +48,42 @@ public class AddContactRecyclerAdapter extends RecyclerView.Adapter<AddContactRe
 
     private void fetchAvailableContacts() {
 
-        databaseReference.child("contactos").child(username).get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
+        ValueEventListener contactosListener = new ValueEventListener() {
             @Override
-            public void onComplete(@NonNull Task<DataSnapshot> task) {
-                if (task.isSuccessful()){
-                    System.out.println(task.getResult().getValue(Contacto.class).getContactsEmail());
-                    emailOfAddedContacts = task.getResult().getValue(Contacto.class).getContactsEmail();
-                    notifyDataSetChanged();
-                }else {
-                    Log.e("Error user contacts", String.valueOf(task.getResult().getValue()));
-                }
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                List<String> contactos = snapshot.child("contactos").child(username).getValue(Contacto.class).getContactsEmail();
+                emailOfAddedContacts = contactos;
+                System.out.println(emailOfAddedContacts);
+                System.out.println("holaaaaaaaaaaaaaaa");
+                notifyDataSetChanged();
             }
-        });
 
-        databaseReference.child("users").get().addOnCompleteListener(new OnCompleteListener<DataSnapshot>() {
             @Override
-            public void onComplete(@NonNull Task<DataSnapshot> task) {
-                if (task.isSuccessful()){
-                    DataSnapshot dataSnapshot = task.getResult();
-                    for (DataSnapshot snapshot: dataSnapshot.getChildren()) {
-                        String email = snapshot.child("email").getValue(String.class);
-                        if (emailOfAddedContacts == null || !emailOfAddedContacts.contains(email)){
-                            userList.add(new User(email));
-                        }
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("Error fetching contacts", error.getMessage());
+            }
+        };
+        databaseReference.addValueEventListener(contactosListener);
+
+        ValueEventListener userListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                userList.clear();
+                for (DataSnapshot data : snapshot.child("users").getChildren()){
+                    String email = data.child("email").getValue(String.class);
+                    System.out.println(email);
+                    if (emailOfAddedContacts == null || !emailOfAddedContacts.contains(email)) {
+                        userList.add(new User(email));
                     }
-                    notifyDataSetChanged();
-                }else {
-                    Log.e("Error fetching contacts", String.valueOf(task.getResult().getValue()));
                 }
             }
-        });
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+                Log.e("Error fetching users", error.getMessage());
+            }
+        };
+        databaseReference.addValueEventListener(userListener);
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
