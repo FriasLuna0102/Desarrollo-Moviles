@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.chatbasicoprojecto.adapters.AddContactRecyclerAdapter;
+import com.example.chatbasicoprojecto.databinding.ActivityAddContactBinding;
 import com.example.chatbasicoprojecto.encapsulaciones.Contacto;
 import com.example.chatbasicoprojecto.encapsulaciones.User;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -33,6 +34,7 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 public class AddContact extends AppCompatActivity implements AddContactRecyclerAdapter.OnItemClickListener {
+    private ActivityAddContactBinding binding;
     private FirebaseDatabase database = FirebaseDatabase.getInstance();
     private DatabaseReference databaseReference = database.getReference();
     private AddContactRecyclerAdapter addContactRecyclerAdapter;
@@ -45,13 +47,8 @@ public class AddContact extends AppCompatActivity implements AddContactRecyclerA
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_add_contact);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
+        binding = ActivityAddContactBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
         recyclerView = findViewById(R.id.contactList);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));

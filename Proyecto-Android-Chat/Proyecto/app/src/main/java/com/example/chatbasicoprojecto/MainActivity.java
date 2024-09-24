@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.chatbasicoprojecto.adapters.ListContactRecyclerAdapter;
 import com.example.chatbasicoprojecto.databinding.ActivityMainBinding;
 import com.example.chatbasicoprojecto.encapsulaciones.User;
+import com.example.chatbasicoprojecto.utils.UserUtils;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.FirebaseApp;
@@ -99,9 +100,9 @@ public class MainActivity extends AppCompatActivity implements ListContactRecycl
 
     @Override
     public void onClick(int position, String username, String email) {
-        Toast toast = Toast.makeText(MainActivity.this, "click " + username, Toast.LENGTH_SHORT);
-        toast.show();
         Intent intent = new Intent(this, PrivateChatActivity.class);
+        intent.putExtra("username", UserUtils.getUsername());
+        intent.putExtra("contactUsername", username);
         startActivity(intent);
     }
 }
