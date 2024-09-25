@@ -2,11 +2,13 @@ package com.example.chatbasicoprojecto;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -19,13 +21,18 @@ import com.example.chatbasicoprojecto.adapters.MessageItemRecyclerAdapter;
 import com.example.chatbasicoprojecto.databinding.ActivityLoginBinding;
 import com.example.chatbasicoprojecto.databinding.ActivityPrivateChatBinding;
 import com.example.chatbasicoprojecto.encapsulaciones.Message;
+import com.example.chatbasicoprojecto.encapsulaciones.PrivateChat;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class PrivateChatActivity extends AppCompatActivity {
     private ActivityPrivateChatBinding binding;
     private RecyclerView recyclerView;
     private MessageItemRecyclerAdapter messageItemRecyclerAdapter;
-    private DatabaseReference databaseReference;
+    private DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
     private String ownerUsername;
     private String contactUsername;
 
@@ -49,13 +56,14 @@ public class PrivateChatActivity extends AppCompatActivity {
     public void sendMessage(View view) {
         EditText editText = (EditText) findViewById(R.id.message_content);
         String text = editText.getText().toString();
-        Message message = new Message(ownerUsername, text);
-        try {
+        if (!text.isEmpty()) {
+            Message message = new Message(ownerUsername, text);
             databaseReference.child("privateChat").child(ownerUsername + "-" + contactUsername)
-                    .child("messageList").setValue(message);
-        }catch (Exception e){
-            e.printStackTrace();
+                    .child("messageList").push().setValue(message);
+            editText.setText("");
+            Toast.makeText(this, "Mensaje enviado", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(this, "No puedes enviar un mensaje vacío", Toast.LENGTH_SHORT).show();
         }
-        Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
     }
 }

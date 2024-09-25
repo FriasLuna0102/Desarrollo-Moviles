@@ -20,6 +20,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 public class MessageItemRecyclerAdapter extends RecyclerView.Adapter<MessageItemRecyclerAdapter.ViewHolder> {
@@ -34,7 +35,6 @@ public class MessageItemRecyclerAdapter extends RecyclerView.Adapter<MessageItem
                 if (privateChat == null){
                     PrivateChat newPrivateChat = new PrivateChat(owner, contact);
                     databaseReference.child("privateChat").child(owner + "-" + contact).setValue(newPrivateChat);
-                    notifyDataSetChanged();
                 }
                 if (privateChat != null && privateChat.getMessageList() == null){
                     privateChat.setMessageList(new ArrayList<>());
