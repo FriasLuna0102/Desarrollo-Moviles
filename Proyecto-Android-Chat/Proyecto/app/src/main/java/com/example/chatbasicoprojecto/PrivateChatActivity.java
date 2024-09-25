@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.chatbasicoprojecto.adapters.MessageItemRecyclerAdapter;
 import com.example.chatbasicoprojecto.databinding.ActivityLoginBinding;
 import com.example.chatbasicoprojecto.databinding.ActivityPrivateChatBinding;
+import com.example.chatbasicoprojecto.encapsulaciones.Message;
 import com.google.firebase.database.DatabaseReference;
 
 public class PrivateChatActivity extends AppCompatActivity {
@@ -25,6 +26,8 @@ public class PrivateChatActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
     private MessageItemRecyclerAdapter messageItemRecyclerAdapter;
     private DatabaseReference databaseReference;
+    private String ownerUsername;
+    private String contactUsername;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -34,16 +37,25 @@ public class PrivateChatActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         Intent intent = getIntent();
+        ownerUsername = intent.getStringExtra("username");
+        contactUsername = intent.getStringExtra("contactUsername");
 
         recyclerView = findViewById(R.id.messages_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        messageItemRecyclerAdapter = new MessageItemRecyclerAdapter(intent.getStringExtra("username"), intent.getStringExtra("contactUsername"));
+        messageItemRecyclerAdapter = new MessageItemRecyclerAdapter(ownerUsername, contactUsername);
         recyclerView.setAdapter(messageItemRecyclerAdapter);
     }
 
     public void sendMessage(View view) {
         EditText editText = (EditText) findViewById(R.id.message_content);
         String text = editText.getText().toString();
+        Message message = new Message(ownerUsername, text);
+        try {
+            databaseReference.child("privateChat").child(ownerUsername + "-" + contactUsername)
+                    .child("messageList").setValue(message);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
         Toast.makeText(this, text, Toast.LENGTH_SHORT).show();
     }
 }
