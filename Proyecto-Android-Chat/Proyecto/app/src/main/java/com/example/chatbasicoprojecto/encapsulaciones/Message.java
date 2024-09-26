@@ -3,6 +3,7 @@ package com.example.chatbasicoprojecto.encapsulaciones;
 public class Message {
     private String senderUsername;
     private String content;
+    private long timeStamp;
 
     public Message() {
     }
@@ -10,6 +11,7 @@ public class Message {
     public Message(String senderUsername, String content) {
         this.senderUsername = senderUsername;
         this.content = content;
+        this.timeStamp = System.currentTimeMillis();
     }
 
     public String getSenderUsername() {
@@ -26,5 +28,13 @@ public class Message {
 
     public void setContent(String content) {
         this.content = content;
+    }
+
+    public long getTimeStamp() {
+        return timeStamp;
+    }
+
+    public void setTimeStamp(long timeStamp) {
+        this.timeStamp = timeStamp;
     }
 }

@@ -20,6 +20,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
@@ -75,6 +78,14 @@ public class MessageItemRecyclerAdapter extends RecyclerView.Adapter<MessageItem
     @Override
     public void onBindViewHolder(@NonNull MessageItemRecyclerAdapter.ViewHolder holder, int position) {
         List<Message> messageList = new ArrayList<>(privateChat.getMessageList().values());
+
+        messageList.sort(new Comparator<Message>() {
+            @Override
+            public int compare(Message message, Message t1) {
+                return Long.compare(message.getTimeStamp(), t1.getTimeStamp());
+            }
+        });
+
         Message message = messageList.get(position);
 
         if (message.getSenderUsername().equals(privateChat.getOwnerUsername())){
