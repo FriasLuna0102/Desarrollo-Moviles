@@ -37,7 +37,7 @@ public class MessageItemRecyclerAdapter extends RecyclerView.Adapter<MessageItem
                     databaseReference.child("privateChat").child(owner + "-" + contact).setValue(newPrivateChat);
                 }
                 if (privateChat != null && privateChat.getMessageList() == null){
-                    privateChat.setMessageList(new ArrayList<>());
+                    privateChat.setMessageList(new HashMap<>());
                 }
                 notifyDataSetChanged();
             }
@@ -74,7 +74,9 @@ public class MessageItemRecyclerAdapter extends RecyclerView.Adapter<MessageItem
 
     @Override
     public void onBindViewHolder(@NonNull MessageItemRecyclerAdapter.ViewHolder holder, int position) {
-        Message message = privateChat.getMessageList().get(position);
+        List<Message> messageList = new ArrayList<>(privateChat.getMessageList().values());
+        Message message = messageList.get(position);
+        System.out.println("Binding message at position " + position + ": " + message.getContent());
 
         if (message.getSenderUsername().equals(privateChat.getOwnerUsername())){
             holder.ownerMessage.setText(message.getContent());

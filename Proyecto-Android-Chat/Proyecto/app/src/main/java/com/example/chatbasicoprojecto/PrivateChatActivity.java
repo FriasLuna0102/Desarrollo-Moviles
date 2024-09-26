@@ -15,6 +15,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.LinearSmoothScroller;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.chatbasicoprojecto.adapters.MessageItemRecyclerAdapter;
@@ -27,6 +28,11 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.List;
+import java.util.Random;
+import java.util.UUID;
 
 public class PrivateChatActivity extends AppCompatActivity {
     private ActivityPrivateChatBinding binding;
@@ -54,14 +60,25 @@ public class PrivateChatActivity extends AppCompatActivity {
     }
 
     public void sendMessage(View view) {
-        EditText editText = (EditText) findViewById(R.id.message_content);
+        EditText editText = findViewById(R.id.message_content);
         String text = editText.getText().toString();
+
         if (!text.isEmpty()) {
             Message message = new Message(ownerUsername, text);
-            databaseReference.child("privateChat").child(ownerUsername + "-" + contactUsername)
-                    .child("messageList").push().setValue(message);
-            editText.setText("");
-            Toast.makeText(this, "Mensaje enviado", Toast.LENGTH_SHORT).show();
+
+            // Generar una nueva clave para el mensaje
+            String messageKey = databaseReference.child("privateChat").child(ownerUsername + "-" + contactUsername)
+                    .child("messageMap").push().getKey();
+
+            if (messageKey != null) {
+                // Enviar el mensaje y guardarlo en el mapa de mensajes
+                databaseReference.child("privateChat").child(ownerUsername + "-" + contactUsername)
+                        .child("messageList").child(messageKey).setValue(message);
+
+                editText.setText("");
+            } else {
+                Toast.makeText(this, "Error al generar la clave del mensaje", Toast.LENGTH_SHORT).show();
+            }
         } else {
             Toast.makeText(this, "No puedes enviar un mensaje vacío", Toast.LENGTH_SHORT).show();
         }
