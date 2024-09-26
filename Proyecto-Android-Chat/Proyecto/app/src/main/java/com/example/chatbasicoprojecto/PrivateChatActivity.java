@@ -56,7 +56,9 @@ public class PrivateChatActivity extends AppCompatActivity {
         contactUsername = intent.getStringExtra("contactUsername");
 
         recyclerView = findViewById(R.id.messages_view);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+        layoutManager.setStackFromEnd(true);
+        recyclerView.setLayoutManager(layoutManager);
         messageItemRecyclerAdapter = new MessageItemRecyclerAdapter(ownerUsername, contactUsername);
         recyclerView.setAdapter(messageItemRecyclerAdapter);
 
