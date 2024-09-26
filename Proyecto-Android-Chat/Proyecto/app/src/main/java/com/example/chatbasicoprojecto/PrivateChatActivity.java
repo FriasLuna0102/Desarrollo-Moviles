@@ -88,4 +88,9 @@ public class PrivateChatActivity extends AppCompatActivity {
             Toast.makeText(this, "No puedes enviar un mensaje vacío", Toast.LENGTH_SHORT).show();
         }
     }
+
+    public void backToMain(View view){
+        Intent intent = new Intent(this, MainActivity.class);
+        startActivity(intent);
+    }
 }
