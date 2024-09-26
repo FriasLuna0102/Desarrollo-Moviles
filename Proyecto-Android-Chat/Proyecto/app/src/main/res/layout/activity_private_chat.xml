@@ -20,12 +20,12 @@
             android:layout_height="match_parent">
 
             <TextView
-                android:id="@+id/toolbar_title"
+                android:id="@+id/private_chat_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:height="48dp"
                 android:gravity="center"
-                android:text="username"
+                android:text="Username"
                 android:textColor="@android:color/white"
                 android:textSize="20sp"
                 android:textStyle="bold"
@@ -34,63 +34,59 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <Button
-                android:id="@+id/volver"
+                android:id="@+id/private_chat_volver"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="215dp"
                 android:layout_marginTop="4dp"
                 android:text="Volver"
-                app:layout_constraintStart_toEndOf="@+id/toolbar_title"
+                android:onClick="backToMain"
+                app:layout_constraintStart_toEndOf="@+id/private_chat_title"
                 app:layout_constraintTop_toTopOf="parent" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.appcompat.widget.Toolbar>
 
-    <LinearLayout
-        android:layout_width="409dp"
-        android:layout_height="673dp"
-        android:layout_marginStart="1dp"
-        android:layout_marginTop="1dp"
-        android:layout_marginEnd="1dp"
-        android:layout_marginBottom="1dp"
-        android:orientation="vertical"
-        android:weightSum="10"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/messages_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_constraintTop_toBottomOf="@+id/toolbar2"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/toolbar2">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/input_message_container"
+        app:layout_constrainedHeight="true"
+        android:layout_marginBottom="5dp"
+        />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/messages_view"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:minHeight="300dp"
-            android:layout_weight="9"/>
+    <LinearLayout
+        android:id="@+id/input_message_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        >
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+        <EditText
+            android:id="@+id/message_content"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:orientation="horizontal">
+            android:ems="18"
+            android:hint="Mensaje"
+            android:inputType="text" />
 
-            <EditText
-                android:id="@+id/message_content"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:ems="18"
-                android:inputType="text"
-                android:text="" />
-
-            <Button
-                android:id="@+id/send"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:onClick="sendMessage"
-                android:text="=>" />
-        </LinearLayout>
+        <Button
+            android:id="@+id/send"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="5dp"
+            android:layout_marginEnd="5dp"
+            android:onClick="sendMessage"
+            android:text="=>" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
