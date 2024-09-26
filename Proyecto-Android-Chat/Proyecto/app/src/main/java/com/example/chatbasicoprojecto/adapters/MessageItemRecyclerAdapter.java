@@ -68,7 +68,7 @@ public class MessageItemRecyclerAdapter extends RecyclerView.Adapter<MessageItem
     @NonNull
     @Override
     public MessageItemRecyclerAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.contact_recycler_row, parent, false);
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.message_recycler_item, parent, false);
         return new ViewHolder(view);
     }
 
