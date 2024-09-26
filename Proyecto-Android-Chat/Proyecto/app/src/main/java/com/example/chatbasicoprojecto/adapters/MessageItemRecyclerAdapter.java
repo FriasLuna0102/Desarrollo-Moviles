@@ -76,7 +76,6 @@ public class MessageItemRecyclerAdapter extends RecyclerView.Adapter<MessageItem
     public void onBindViewHolder(@NonNull MessageItemRecyclerAdapter.ViewHolder holder, int position) {
         List<Message> messageList = new ArrayList<>(privateChat.getMessageList().values());
         Message message = messageList.get(position);
-        System.out.println("Binding message at position " + position + ": " + message.getContent());
 
         if (message.getSenderUsername().equals(privateChat.getOwnerUsername())){
             holder.ownerMessage.setText(message.getContent());
