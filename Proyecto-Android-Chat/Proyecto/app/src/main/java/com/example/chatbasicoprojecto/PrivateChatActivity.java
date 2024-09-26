@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -54,9 +56,12 @@ public class PrivateChatActivity extends AppCompatActivity {
         contactUsername = intent.getStringExtra("contactUsername");
 
         recyclerView = findViewById(R.id.messages_view);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false));
         messageItemRecyclerAdapter = new MessageItemRecyclerAdapter(ownerUsername, contactUsername);
         recyclerView.setAdapter(messageItemRecyclerAdapter);
+
+        TextView chatTitle = findViewById(R.id.private_chat_title);
+        chatTitle.setText(contactUsername);
     }
 
     public void sendMessage(View view) {
