@@ -1,9 +1,16 @@
 package com.example.chatbasicoprojecto.encapsulaciones;
 
+import android.os.Build;
+
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+
 public class Message {
     private String senderUsername;
     private String content;
     private long timeStamp;
+    private String date;
 
     public Message() {
     }
@@ -12,6 +19,10 @@ public class Message {
         this.senderUsername = senderUsername;
         this.content = content;
         this.timeStamp = System.currentTimeMillis();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            this.date = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm"));
+        }
+
     }
 
     public String getSenderUsername() {
@@ -36,5 +47,13 @@ public class Message {
 
     public void setTimeStamp(long timeStamp) {
         this.timeStamp = timeStamp;
+    }
+
+    public String getDate() {
+        return date;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
     }
 }
