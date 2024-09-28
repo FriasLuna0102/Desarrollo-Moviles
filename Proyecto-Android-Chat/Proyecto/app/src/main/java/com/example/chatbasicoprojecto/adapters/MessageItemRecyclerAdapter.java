@@ -3,12 +3,14 @@ package com.example.chatbasicoprojecto.adapters;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.chatbasicoprojecto.R;
 import com.example.chatbasicoprojecto.encapsulaciones.Message;
 import com.example.chatbasicoprojecto.encapsulaciones.PrivateChat;
@@ -28,8 +30,10 @@ public class MessageItemRecyclerAdapter extends RecyclerView.Adapter<MessageItem
     public static class ViewHolder extends RecyclerView.ViewHolder{
         LinearLayout ownerMessageContainer;
         TextView ownerNameDisplay, ownerMessage, ownerMessageDate;
+        ImageView ownerImageMessage;
         LinearLayout contactMessageContainer;
         TextView contactNameDisplay, contactMessage, contactMessageDate;
+        ImageView contactImageMessage;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -37,11 +41,13 @@ public class MessageItemRecyclerAdapter extends RecyclerView.Adapter<MessageItem
             this.ownerNameDisplay = itemView.findViewById(R.id.owner_message_name_display);
             this.ownerMessage = itemView.findViewById(R.id.owner_message);
             this.ownerMessageDate = itemView.findViewById(R.id.owner_message_time_display);
+            this.ownerImageMessage = itemView.findViewById(R.id.owner_image_message);
 
             this.contactMessageContainer = itemView.findViewById(R.id.contact_message_container);
             this.contactNameDisplay = itemView.findViewById(R.id.contact_message_name_display);
             this.contactMessage = itemView.findViewById(R.id.contact_message);
             this.contactMessageDate = itemView.findViewById(R.id.contact_message_time_display);
+            this.contactImageMessage = itemView.findViewById(R.id.contact_image_message);
         }
     }
 
@@ -67,15 +73,37 @@ public class MessageItemRecyclerAdapter extends RecyclerView.Adapter<MessageItem
 
         if (message.getSenderUsername().equals(UserUtils.getUsername())){
             holder.ownerNameDisplay.setText(message.getSenderUsername());
-            holder.ownerMessage.setText(message.getContent());
             holder.ownerMessageDate.setText(message.getDate());
+
+            if (message.getImageUrl() != null && !message.getImageUrl().isEmpty()) {
+                holder.ownerMessage.setVisibility(View.GONE);
+                holder.ownerImageMessage.setVisibility(View.VISIBLE);
+                Glide.with(holder.itemView.getContext())
+                        .load(message.getImageUrl())
+                        .into(holder.ownerImageMessage);
+            } else {
+                holder.ownerMessage.setVisibility(View.VISIBLE);
+                holder.ownerImageMessage.setVisibility(View.GONE);
+                holder.ownerMessage.setText(message.getContent());
+            }
 
             holder.ownerMessageContainer.setVisibility(View.VISIBLE);
             holder.contactMessageContainer.setVisibility(View.GONE);
-        }else {
+        } else {
             holder.contactNameDisplay.setText(message.getSenderUsername());
-            holder.contactMessage.setText(message.getContent());
             holder.contactMessageDate.setText(message.getDate());
+
+            if (message.getImageUrl() != null && !message.getImageUrl().isEmpty()) {
+                holder.contactMessage.setVisibility(View.GONE);
+                holder.contactImageMessage.setVisibility(View.VISIBLE);
+                Glide.with(holder.itemView.getContext())
+                        .load(message.getImageUrl())
+                        .into(holder.contactImageMessage);
+            } else {
+                holder.contactMessage.setVisibility(View.VISIBLE);
+                holder.contactImageMessage.setVisibility(View.GONE);
+                holder.contactMessage.setText(message.getContent());
+            }
 
             holder.contactMessageContainer.setVisibility(View.VISIBLE);
             holder.ownerMessageContainer.setVisibility(View.GONE);
