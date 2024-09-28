@@ -11,17 +11,19 @@ public class Message {
     private String content;
     private long timeStamp;
     private String date;
+    private String imageUrl;
 
     public Message() {
     }
 
-    public Message(String senderUsername, String content) {
+    public Message(String senderUsername, String content, String imageUrl) {
         this.senderUsername = senderUsername;
         this.content = content;
         this.timeStamp = System.currentTimeMillis();
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             this.date = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm"));
         }
+        this.imageUrl = imageUrl;
 
     }
 
@@ -55,5 +57,13 @@ public class Message {
 
     public void setDate(String date) {
         this.date = date;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 }
