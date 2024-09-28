@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.chatbasicoprojecto.R;
 import com.example.chatbasicoprojecto.encapsulaciones.Message;
 import com.example.chatbasicoprojecto.encapsulaciones.PrivateChat;
+import com.example.chatbasicoprojecto.utils.UserUtils;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -29,32 +30,10 @@ import java.util.List;
 public class MessageItemRecyclerAdapter extends RecyclerView.Adapter<MessageItemRecyclerAdapter.ViewHolder> {
     private PrivateChat privateChat;
     private DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
+    private String chatId;
 
-    public void fetchPrivateChat(String owner, String contact){
-        ValueEventListener privatChatInfo = new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                privateChat = snapshot.child("privateChat").child(owner + "-" + contact).getValue(PrivateChat.class);
-                if (privateChat == null){
-                    PrivateChat newPrivateChat = new PrivateChat(owner, contact);
-                    databaseReference.child("privateChat").child(owner + "-" + contact).setValue(newPrivateChat);
-                }
-                if (privateChat != null && privateChat.getMessageList() == null){
-                    privateChat.setMessageList(new HashMap<>());
-                }
-                notifyDataSetChanged();
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Log.e("Error al obtener chat privado", error.getMessage());
-            }
-        };
-        databaseReference.addValueEventListener(privatChatInfo);
-    }
-
-    public MessageItemRecyclerAdapter(String ownerUsername, String contactUsername){
-        fetchPrivateChat(ownerUsername, contactUsername);
+    public MessageItemRecyclerAdapter(PrivateChat privateChat){
+        this.privateChat = privateChat;
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder{
@@ -88,7 +67,7 @@ public class MessageItemRecyclerAdapter extends RecyclerView.Adapter<MessageItem
 
         Message message = messageList.get(position);
 
-        if (message.getSenderUsername().equals(privateChat.getOwnerUsername())){
+        if (message.getSenderUsername().equals(UserUtils.getUsername())){
             holder.ownerMessage.setText(message.getContent());
             holder.ownerMessage.setVisibility(View.VISIBLE);
             holder.contactMessage.setVisibility(View.GONE);
