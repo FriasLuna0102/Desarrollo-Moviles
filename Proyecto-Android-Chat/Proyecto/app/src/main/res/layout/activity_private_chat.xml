@@ -86,7 +86,15 @@
             android:layout_marginStart="5dp"
             android:layout_marginEnd="5dp"
             android:onClick="sendMessage"
-            android:text="=>" />
+            android:text="Enviar" />
+
+        <Button
+            android:id="@+id/button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="0.6"
+            android:onClick="openImageChooser"
+            android:text="Imagenes" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
