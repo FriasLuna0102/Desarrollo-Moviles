@@ -19,15 +19,19 @@ import com.example.chatbasicoprojecto.utils.UserUtils;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import com.bumptech.glide.Glide;
+import android.content.Context;
 
 public class MessageItemRecyclerAdapter extends RecyclerView.Adapter<MessageItemRecyclerAdapter.ViewHolder> {
     private PrivateChat privateChat;
+    private Context context;
 
-    public MessageItemRecyclerAdapter(PrivateChat privateChat){
+    public MessageItemRecyclerAdapter(PrivateChat privateChat, Context context) {
         this.privateChat = privateChat;
+        this.context = context;
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder{
+    public static class ViewHolder extends RecyclerView.ViewHolder {
         LinearLayout ownerMessageContainer;
         TextView ownerNameDisplay, ownerMessage, ownerMessageDate;
         ImageView ownerImageMessage;
@@ -53,66 +57,80 @@ public class MessageItemRecyclerAdapter extends RecyclerView.Adapter<MessageItem
 
     @NonNull
     @Override
-    public MessageItemRecyclerAdapter.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.message_recycler_item, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull MessageItemRecyclerAdapter.ViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         List<Message> messageList = new ArrayList<>(privateChat.getMessageList().values());
-
-        messageList.sort(new Comparator<Message>() {
-            @Override
-            public int compare(Message message, Message t1) {
-                return Long.compare(message.getTimeStamp(), t1.getTimeStamp());
-            }
-        });
+        messageList.sort(Comparator.comparingLong(Message::getTimeStamp));
 
         Message message = messageList.get(position);
 
-        if (message.getSenderUsername().equals(UserUtils.getUsername())){
-            holder.ownerNameDisplay.setText(message.getSenderUsername());
-            holder.ownerMessageDate.setText(message.getDate());
-
-            if (message.getImageUrl() != null && !message.getImageUrl().isEmpty()) {
-                holder.ownerMessage.setVisibility(View.GONE);
-                holder.ownerImageMessage.setVisibility(View.VISIBLE);
-                Glide.with(holder.itemView.getContext())
-                        .load(message.getImageUrl())
-                        .into(holder.ownerImageMessage);
-            } else {
-                holder.ownerMessage.setVisibility(View.VISIBLE);
-                holder.ownerImageMessage.setVisibility(View.GONE);
-                holder.ownerMessage.setText(message.getContent());
-            }
-
-            holder.ownerMessageContainer.setVisibility(View.VISIBLE);
-            holder.contactMessageContainer.setVisibility(View.GONE);
+        if (message.getSenderUsername().equals(UserUtils.getUsername())) {
+            configureOwnerMessage(holder, message);
         } else {
-            holder.contactNameDisplay.setText(message.getSenderUsername());
-            holder.contactMessageDate.setText(message.getDate());
-
-            if (message.getImageUrl() != null && !message.getImageUrl().isEmpty()) {
-                holder.contactMessage.setVisibility(View.GONE);
-                holder.contactImageMessage.setVisibility(View.VISIBLE);
-                Glide.with(holder.itemView.getContext())
-                        .load(message.getImageUrl())
-                        .into(holder.contactImageMessage);
-            } else {
-                holder.contactMessage.setVisibility(View.VISIBLE);
-                holder.contactImageMessage.setVisibility(View.GONE);
-                holder.contactMessage.setText(message.getContent());
-            }
-
-            holder.contactMessageContainer.setVisibility(View.VISIBLE);
-            holder.ownerMessageContainer.setVisibility(View.GONE);
+            configureContactMessage(holder, message);
         }
+    }
+
+    private void configureOwnerMessage(ViewHolder holder, Message message) {
+        holder.ownerNameDisplay.setText(message.getSenderUsername());
+        holder.ownerMessageDate.setText(message.getDate());
+
+        // Mostrar texto si existe
+        if (message.getContent() != null && !message.getContent().isEmpty()) {
+            holder.ownerMessage.setVisibility(View.VISIBLE);
+            holder.ownerMessage.setText(message.getContent());
+        } else {
+            holder.ownerMessage.setVisibility(View.GONE);
+        }
+
+        // Mostrar imagen si existe
+        if (message.getImageUrl() != null && !message.getImageUrl().isEmpty()) {
+            holder.ownerImageMessage.setVisibility(View.VISIBLE);
+            Glide.with(context)
+                    .load(message.getImageUrl())
+                    .into(holder.ownerImageMessage);
+        } else {
+            holder.ownerImageMessage.setVisibility(View.GONE);
+        }
+
+        holder.ownerMessageContainer.setVisibility(View.VISIBLE);
+        holder.contactMessageContainer.setVisibility(View.GONE);
+    }
+
+    private void configureContactMessage(ViewHolder holder, Message message) {
+        holder.contactNameDisplay.setText(message.getSenderUsername());
+        holder.contactMessageDate.setText(message.getDate());
+
+        // Mostrar texto si existe
+        if (message.getContent() != null && !message.getContent().isEmpty()) {
+            holder.contactMessage.setVisibility(View.VISIBLE);
+            holder.contactMessage.setText(message.getContent());
+        } else {
+            holder.contactMessage.setVisibility(View.GONE);
+        }
+
+        // Mostrar imagen si existe
+        if (message.getImageUrl() != null && !message.getImageUrl().isEmpty()) {
+            holder.contactImageMessage.setVisibility(View.VISIBLE);
+            Glide.with(context)
+                    .load(message.getImageUrl())
+                    .into(holder.contactImageMessage);
+        } else {
+            holder.contactImageMessage.setVisibility(View.GONE);
+        }
+
+        holder.contactMessageContainer.setVisibility(View.VISIBLE);
+        holder.ownerMessageContainer.setVisibility(View.GONE);
     }
 
     @Override
     public int getItemCount() {
-        if (privateChat == null || privateChat.getMessageList() == null){
+        if (privateChat == null || privateChat.getMessageList() == null) {
             return 0;
         }
         return privateChat.getMessageList().size();

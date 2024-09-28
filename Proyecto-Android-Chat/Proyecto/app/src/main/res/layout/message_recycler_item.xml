@@ -5,39 +5,38 @@
     android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:padding="1dp">
+    android:padding="4dp">
 
     <LinearLayout
         android:id="@+id/owner_message_container"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:background="@color/colorAccent"
-        android:layout_marginStart="20dp"
-        android:layout_marginEnd="5dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        android:layout_marginStart="60dp"
+        android:layout_marginEnd="8dp"
+        android:padding="8dp"
+        android:layout_gravity="end">
 
         <TextView
             android:id="@+id/owner_message_name_display"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAllCaps="true"
             android:textAlignment="viewEnd"
-            android:textSize="15sp"
-            android:text="user"/>
+            android:textSize="12sp"
+            android:layout_gravity="end"
+            tools:text="USER"/>
 
         <TextView
             android:id="@+id/owner_message"
             android:textColor="@color/black"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="TextView"
             android:textAlignment="viewEnd"
-            android:textSize="20sp" />
+            android:textSize="16sp"
+            android:layout_gravity="end"
+            tools:text="Message text"/>
 
         <ImageView
             android:id="@+id/owner_image_message"
@@ -46,47 +45,47 @@
             android:layout_gravity="end"
             android:scaleType="centerCrop"
             android:visibility="gone"
-            android:contentDescription="Imagen enviada por el propietario"/>
+            android:contentDescription="Imagen enviada por el propietario"
+            android:layout_marginTop="4dp"/>
 
         <TextView
             android:id="@+id/owner_message_time_display"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="hora"
-            android:textAlignment="viewEnd" />
+            android:textAlignment="viewEnd"
+            android:textSize="10sp"
+            android:layout_gravity="end"
+            tools:text="12:34 PM"/>
 
     </LinearLayout>
 
     <LinearLayout
         android:id="@+id/contact_message_container"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:layout_marginEnd="20dp"
-        android:layout_marginStart="5dp"
+        android:layout_marginEnd="60dp"
+        android:layout_marginStart="8dp"
+        android:padding="8dp"
         android:background="@color/cardview_shadow_start_color"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        android:layout_gravity="start">
 
         <TextView
             android:id="@+id/contact_message_name_display"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAllCaps="true"
-            android:textSize="15sp"
-            android:text="user"/>
+            android:textSize="12sp"
+            tools:text="CONTACT"/>
 
         <TextView
             android:id="@+id/contact_message"
             android:textColor="@color/black"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="TextView"
             android:textAlignment="viewStart"
-            android:textSize="20sp" />
+            android:textSize="16sp"
+            tools:text="Contact message"/>
 
         <ImageView
             android:id="@+id/contact_image_message"
@@ -95,14 +94,16 @@
             android:layout_gravity="start"
             android:scaleType="centerCrop"
             android:visibility="gone"
-            android:contentDescription="Imagen enviada por el contacto"/>
+            android:contentDescription="Imagen enviada por el contacto"
+            android:layout_marginTop="4dp"/>
 
         <TextView
             android:id="@+id/contact_message_time_display"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="hora"
-            android:textAlignment="viewStart" />
+            android:textAlignment="viewStart"
+            android:textSize="10sp"
+            tools:text="12:34 PM"/>
 
     </LinearLayout>
 

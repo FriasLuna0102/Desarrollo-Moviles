@@ -8,30 +8,23 @@ import android.util.Log;
 import android.view.View;
 import android.webkit.MimeTypeMap;
 import android.widget.EditText;
-import android.widget.LinearLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.LinearSmoothScroller;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.chatbasicoprojecto.adapters.MessageItemRecyclerAdapter;
-import com.example.chatbasicoprojecto.databinding.ActivityLoginBinding;
 import com.example.chatbasicoprojecto.databinding.ActivityPrivateChatBinding;
 import com.example.chatbasicoprojecto.encapsulaciones.Message;
 import com.example.chatbasicoprojecto.encapsulaciones.PrivateChat;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -40,11 +33,6 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
-import java.util.UUID;
 
 public class PrivateChatActivity extends AppCompatActivity {
     private ActivityPrivateChatBinding binding;
@@ -57,6 +45,7 @@ public class PrivateChatActivity extends AppCompatActivity {
     private PrivateChat privateChat;
     private static final int PICK_IMAGE_REQUEST = 1;
     private Uri imageUri;
+    private ImageView imagePreview;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -84,7 +73,6 @@ public class PrivateChatActivity extends AppCompatActivity {
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
                 Log.e("Error en privatechatactivity", "No fue possible buscar el chat por id");
-
             }
         });
 
@@ -95,29 +83,31 @@ public class PrivateChatActivity extends AppCompatActivity {
 
         TextView chatTitle = findViewById(R.id.private_chat_title);
         chatTitle.setText(contactUsername);
+
+        imagePreview = findViewById(R.id.image_preview);
     }
 
     public void sendMessage(View view) {
         EditText editText = findViewById(R.id.message_content);
         String text = editText.getText().toString();
-
         if (!text.isEmpty() || imageUri != null) {
             String messageKey = databaseReference.child("privateChat").child(chatID)
                     .child("messageMap").push().getKey();
 
             if (messageKey != null) {
                 if (imageUri != null) {
-                    // Enviar imagen
-                    uploadImage(messageKey);
+                    // Enviar imagen con o sin texto
+                    uploadImage(messageKey, text);
                 } else {
-                    // Enviar texto
+                    // Enviar solo texto
                     Message message = new Message(ownerUsername, text, null);
                     databaseReference.child("privateChat").child(chatID)
                             .child("messageList").child(messageKey).setValue(message);
                 }
 
                 editText.setText("");
-                imageUri = null; // Resetear la URI de la imagen
+                imageUri = null;
+                imagePreview.setVisibility(View.GONE);
             } else {
                 Toast.makeText(this, "Error al generar la clave del mensaje", Toast.LENGTH_SHORT).show();
             }
@@ -126,7 +116,7 @@ public class PrivateChatActivity extends AppCompatActivity {
         }
     }
 
-    private void uploadImage(final String messageKey) {
+    private void uploadImage(final String messageKey, final String text) {
         if (imageUri != null) {
             final StorageReference fileReference = FirebaseStorage.getInstance().getReference("chat_images")
                     .child(System.currentTimeMillis() + "." + getFileExtension(imageUri));
@@ -139,7 +129,7 @@ public class PrivateChatActivity extends AppCompatActivity {
                                 @Override
                                 public void onSuccess(Uri uri) {
                                     String imageUrl = uri.toString();
-                                    Message message = new Message(ownerUsername, "", imageUrl);
+                                    Message message = new Message(ownerUsername, text, imageUrl);
                                     databaseReference.child("privateChat").child(chatID)
                                             .child("messageList").child(messageKey).setValue(message);
                                 }
@@ -161,7 +151,6 @@ public class PrivateChatActivity extends AppCompatActivity {
         return mime.getExtensionFromMimeType(contentResolver.getType(uri));
     }
 
-    // Método para abrir el selector de imágenes
     public void openImageChooser(View view) {
         Intent intent = new Intent();
         intent.setType("image/*");
@@ -169,7 +158,6 @@ public class PrivateChatActivity extends AppCompatActivity {
         startActivityForResult(Intent.createChooser(intent, "Selecciona una imagen"), PICK_IMAGE_REQUEST);
     }
 
-    // Manejo de la selección de la imagen
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -177,6 +165,8 @@ public class PrivateChatActivity extends AppCompatActivity {
         if (requestCode == PICK_IMAGE_REQUEST && resultCode == RESULT_OK
                 && data != null && data.getData() != null) {
             imageUri = data.getData();
+            imagePreview.setVisibility(View.VISIBLE);
+            Glide.with(this).load(imageUri).into(imagePreview);
         }
     }
 
@@ -195,8 +185,10 @@ public class PrivateChatActivity extends AppCompatActivity {
                     databaseReference.child("privateChat").child(chatID).setValue(newPrivateChat);
                     privateChat = newPrivateChat;
                 }
-                messageItemRecyclerAdapter = new MessageItemRecyclerAdapter(privateChat);
+                messageItemRecyclerAdapter = new MessageItemRecyclerAdapter(privateChat, PrivateChatActivity.this);
+
                 recyclerView.setAdapter(messageItemRecyclerAdapter);
+                recyclerView.scrollToPosition(messageItemRecyclerAdapter.getItemCount() - 1);
             }
 
             @Override
