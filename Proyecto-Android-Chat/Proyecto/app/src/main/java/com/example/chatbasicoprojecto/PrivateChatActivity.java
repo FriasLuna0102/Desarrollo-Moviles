@@ -23,6 +23,7 @@ import com.example.chatbasicoprojecto.adapters.MessageItemRecyclerAdapter;
 import com.example.chatbasicoprojecto.databinding.ActivityPrivateChatBinding;
 import com.example.chatbasicoprojecto.encapsulaciones.Message;
 import com.example.chatbasicoprojecto.encapsulaciones.PrivateChat;
+import com.example.chatbasicoprojecto.notifications.NotificationSender;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
@@ -96,13 +97,15 @@ public class PrivateChatActivity extends AppCompatActivity {
 
             if (messageKey != null) {
                 if (imageUri != null) {
-                    // Enviar imagen con o sin texto
                     uploadImage(messageKey, text);
                 } else {
-                    // Enviar solo texto
                     Message message = new Message(ownerUsername, text, null);
                     databaseReference.child("privateChat").child(chatID)
-                            .child("messageList").child(messageKey).setValue(message);
+                            .child("messageList").child(messageKey).setValue(message)
+                            .addOnSuccessListener(aVoid -> {
+                                // Enviar notificación
+                                sendNotificationToRecipient(contactUsername, text);
+                            });
                 }
 
                 editText.setText("");
@@ -114,6 +117,39 @@ public class PrivateChatActivity extends AppCompatActivity {
         } else {
             Toast.makeText(this, "No puedes enviar un mensaje vacío", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void sendNotificationToRecipient(String recipientUsername, String messageContent) {
+        System.out.println("Buscando usuario: " + recipientUsername);
+        DatabaseReference usersRef = FirebaseDatabase.getInstance().getReference("users");
+
+        usersRef.orderByChild("username").equalTo(recipientUsername).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                System.out.println("Consulta completada. Número de resultados: " + dataSnapshot.getChildrenCount());
+
+                if (dataSnapshot.exists()) {
+                    for (DataSnapshot userSnapshot : dataSnapshot.getChildren()) {
+                        String fcmToken = userSnapshot.child("fcmToken").getValue(String.class);
+                        System.out.println("Token FCM encontrado: " + fcmToken);
+
+                        if (fcmToken != null) {
+                            NotificationSender notificationSender = new NotificationSender();
+                            notificationSender.sendNotification(fcmToken, "Mensaje de " + ownerUsername, messageContent);
+                        } else {
+                            System.out.println("Token FCM es null para el usuario: " + recipientUsername);
+                        }
+                    }
+                } else {
+                    System.out.println("No se encontraron documentos para el usuario: " + recipientUsername);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+                System.out.println("Error al buscar el usuario: " + databaseError.getMessage());
+            }
+        });
     }
 
     private void uploadImage(final String messageKey, final String text) {
@@ -132,6 +168,8 @@ public class PrivateChatActivity extends AppCompatActivity {
                                     Message message = new Message(ownerUsername, text, imageUrl);
                                     databaseReference.child("privateChat").child(chatID)
                                             .child("messageList").child(messageKey).setValue(message);
+                                    // Enviar notificación
+                                    sendNotificationToRecipient(contactUsername, text);
                                 }
                             });
                         }

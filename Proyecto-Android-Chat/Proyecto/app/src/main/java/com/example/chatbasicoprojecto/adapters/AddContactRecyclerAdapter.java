@@ -1,32 +1,24 @@
 package com.example.chatbasicoprojecto.adapters;
 
-import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.TextView;
-
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.example.chatbasicoprojecto.R;
 import com.example.chatbasicoprojecto.encapsulaciones.Contacto;
 import com.example.chatbasicoprojecto.encapsulaciones.User;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-
+import com.google.firebase.database.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class AddContactRecyclerAdapter extends RecyclerView.Adapter<AddContactRecyclerAdapter.ViewHolder> {
+public class AddContactRecyclerAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+
+    private static final int VIEW_TYPE_EMPTY = 0;
+    private static final int VIEW_TYPE_CONTACT = 1;
 
     private FirebaseDatabase database = FirebaseDatabase.getInstance();
     private DatabaseReference databaseReference = database.getReference();
@@ -47,29 +39,34 @@ public class AddContactRecyclerAdapter extends RecyclerView.Adapter<AddContactRe
     }
 
     private void fetchAvailableContacts() {
-
         ValueEventListener contactosListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                List<String> contactos = snapshot.child("contactos").child(username).getValue(Contacto.class).getContactsEmail();
-                emailOfAddedContacts = contactos;
-                notifyDataSetChanged();
+                Contacto contacto = snapshot.child("contactos").child(username).getValue(Contacto.class);
+                if (contacto != null && contacto.getContactsEmail() != null) {
+                    emailOfAddedContacts = contacto.getContactsEmail();
+                } else {
+                    emailOfAddedContacts.clear();
+                }
+                fetchUsers();
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
-                Log.e("Error fetching contacts", error.getMessage());
+                // Manejar el error
             }
         };
         databaseReference.addValueEventListener(contactosListener);
+    }
 
+    private void fetchUsers() {
         ValueEventListener userListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 userList.clear();
-                for (DataSnapshot data : snapshot.child("users").getChildren()){
+                for (DataSnapshot data : snapshot.child("users").getChildren()) {
                     String email = data.child("email").getValue(String.class);
-                    if (emailOfAddedContacts == null || !emailOfAddedContacts.contains(email)) {
+                    if (!emailOfAddedContacts.contains(email) && !email.equals(userEmail)) {
                         userList.add(new User(email));
                     }
                 }
@@ -84,12 +81,47 @@ public class AddContactRecyclerAdapter extends RecyclerView.Adapter<AddContactRe
         databaseReference.addValueEventListener(userListener);
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+    @NonNull
+    @Override
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        if (viewType == VIEW_TYPE_EMPTY) {
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_empty_view, parent, false);
+            return new EmptyViewHolder(view);
+        } else {
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.contact_recycler_row, parent, false);
+            return new ContactViewHolder(view, this.onClickListener);
+        }
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+        if (holder instanceof ContactViewHolder) {
+            ContactViewHolder contactHolder = (ContactViewHolder) holder;
+            User user = userList.get(position);
+            contactHolder.username.setText(user.getUsername());
+            contactHolder.email.setText(user.getEmail());
+        } else if (holder instanceof EmptyViewHolder) {
+            EmptyViewHolder emptyHolder = (EmptyViewHolder) holder;
+            emptyHolder.emptyText.setText("No hay contactos para agregar");
+        }
+    }
+
+    @Override
+    public int getItemCount() {
+        return userList.isEmpty() ? 1 : userList.size();
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return userList.isEmpty() ? VIEW_TYPE_EMPTY : VIEW_TYPE_CONTACT;
+    }
+
+    static class ContactViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView username;
         TextView email;
         OnItemClickListener onItemClickListener;
 
-        public ViewHolder(@NonNull View view, OnItemClickListener onItemClickListener){
+        public ContactViewHolder(@NonNull View view, OnItemClickListener onItemClickListener) {
             super(view);
             this.username = view.findViewById(R.id.username_add_contact);
             this.email = view.findViewById(R.id.email_add_contact);
@@ -103,22 +135,12 @@ public class AddContactRecyclerAdapter extends RecyclerView.Adapter<AddContactRe
         }
     }
 
-    @NonNull
-    @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.contact_recycler_row, parent, false);
+    static class EmptyViewHolder extends RecyclerView.ViewHolder {
+        TextView emptyText;
 
-        return new ViewHolder(view, this.onClickListener);
-    }
-
-    @Override
-    public void onBindViewHolder(@NonNull AddContactRecyclerAdapter.ViewHolder holder, int position) {
-        holder.username.setText(userList.get(position).getUsername());
-        holder.email.setText(userList.get(position).getEmail());
-    }
-
-    @Override
-    public int getItemCount() {
-        return userList.size();
+        public EmptyViewHolder(@NonNull View itemView) {
+            super(itemView);
+            emptyText = itemView.findViewById(R.id.empty_text);
+        }
     }
 }
