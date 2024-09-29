@@ -6,6 +6,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -40,6 +41,7 @@ public class MainActivity extends AppCompatActivity implements ListContactRecycl
     private RecyclerView recyclerView;
     private ListContactRecyclerAdapter listContactRecyclerAdapter;
     private String username = UserUtils.getUsername();
+    private TextView userName;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -83,6 +85,8 @@ public class MainActivity extends AppCompatActivity implements ListContactRecycl
         listContactRecyclerAdapter = new ListContactRecyclerAdapter(this);
         recyclerView.setAdapter(listContactRecyclerAdapter);
 
+        userName = findViewById(R.id.userLayaoutName);
+        userName.setText(username);
     }
 
     @Override

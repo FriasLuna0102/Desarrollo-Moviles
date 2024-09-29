@@ -1,5 +1,6 @@
 package com.example.chatbasicoprojecto.adapters;
 
+import android.graphics.Color;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,7 +14,7 @@ import com.example.chatbasicoprojecto.R;
 import com.example.chatbasicoprojecto.encapsulaciones.Contacto;
 import com.example.chatbasicoprojecto.encapsulaciones.User;
 import com.example.chatbasicoprojecto.utils.UserUtils;
-import com.google.firebase.auth.FirebaseAuth;
+import com.google.android.material.imageview.ShapeableImageView;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -22,6 +23,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class ListContactRecyclerAdapter extends RecyclerView.Adapter<ListContactRecyclerAdapter.ViewHolder> {
     private final DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
@@ -32,18 +34,17 @@ public class ListContactRecyclerAdapter extends RecyclerView.Adapter<ListContact
         void onClick(int position, String username, String email);
     }
 
-    public void fetchContacts(){
-
+    public void fetchContacts() {
         ValueEventListener contactListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.exists()){
+                if (snapshot.exists()) {
                     contactList.clear();
                     Contacto contacto = snapshot.child("contactos").child(UserUtils.getUsername()).getValue(Contacto.class);
-                    if (contacto != null && contacto.getContactsEmail() != null){
+                    if (contacto != null && contacto.getContactsEmail() != null) {
                         List<String> contactos = contacto.getContactsEmail();
-                        for (String emailContacto : contactos){
-                            if (emailContacto != null){
+                        for (String emailContacto : contactos) {
+                            if (emailContacto != null) {
                                 contactList.add(new User(emailContacto));
                             }
                         }
@@ -60,20 +61,24 @@ public class ListContactRecyclerAdapter extends RecyclerView.Adapter<ListContact
         databaseReference.addListenerForSingleValueEvent(contactListener);
     }
 
-    public ListContactRecyclerAdapter(OnItemClickListener onItemClickListener){
+    public ListContactRecyclerAdapter(OnItemClickListener onItemClickListener) {
         this.onClickListener = onItemClickListener;
         fetchContacts();
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
+    public static class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView username;
         TextView email;
+        ShapeableImageView avatarImage;
+        TextView avatarText;
         OnItemClickListener onItemClickListener;
 
         public ViewHolder(@NonNull View itemView, OnItemClickListener onItemClickListener) {
             super(itemView);
             this.username = itemView.findViewById(R.id.username_add_contact);
             this.email = itemView.findViewById(R.id.email_add_contact);
+            this.avatarImage = itemView.findViewById(R.id.avatar_image);
+            this.avatarText = itemView.findViewById(R.id.avatar_text);
             itemView.setOnClickListener(this);
             this.onItemClickListener = onItemClickListener;
         }
@@ -88,14 +93,23 @@ public class ListContactRecyclerAdapter extends RecyclerView.Adapter<ListContact
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.contact_recycler_row, parent, false);
-
         return new ViewHolder(view, this.onClickListener);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ListContactRecyclerAdapter.ViewHolder holder, int position) {
-        holder.username.setText(contactList.get(position).getUsername());
-        holder.email.setText(contactList.get(position).getEmail());
+        User user = contactList.get(position);
+        holder.username.setText(user.getUsername());
+        holder.email.setText(user.getEmail());
+
+        // Genera las iniciales del nombre de usuario
+        String initials = user.getUsername().substring(0, Math.min(user.getUsername().length(), 2)).toUpperCase();
+        holder.avatarText.setText(initials);
+
+        // Genera un color aleatorio para el fondo del avatar
+        Random rnd = new Random();
+        int color = Color.argb(255, rnd.nextInt(256), rnd.nextInt(256), rnd.nextInt(256));
+        holder.avatarImage.setBackgroundColor(color);
     }
 
     @Override

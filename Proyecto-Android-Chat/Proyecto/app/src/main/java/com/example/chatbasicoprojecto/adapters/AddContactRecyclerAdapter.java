@@ -66,7 +66,7 @@ public class AddContactRecyclerAdapter extends RecyclerView.Adapter<RecyclerView
                 userList.clear();
                 for (DataSnapshot data : snapshot.child("users").getChildren()) {
                     String email = data.child("email").getValue(String.class);
-                    if (!emailOfAddedContacts.contains(email) && !email.equals(userEmail)) {
+                    if (email != null && !email.isEmpty() && !emailOfAddedContacts.contains(email) && !email.equals(userEmail)) {
                         userList.add(new User(email));
                     }
                 }

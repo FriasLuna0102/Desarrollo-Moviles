@@ -28,7 +28,7 @@ public class Login extends AppCompatActivity {
     private ActivityLoginBinding binding;
     private FirebaseAuth mAuth;
     private static final String TAG = "LoginActivity";
-    private String username = UserUtils.getUsername();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,67 +38,62 @@ public class Login extends AppCompatActivity {
 
         FirebaseApp.initializeApp(this);
         mAuth = FirebaseAuth.getInstance();
-
-
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        // Check if user is signed in (non-null) and update UI accordingly.
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if(currentUser != null){
-            // User is already signed in, you might want to redirect to main activity
-            // updateUI(currentUser);
+            // User is already signed in, redirect to main activity
+            goToMainActivity();
         }
     }
 
     public void onLoginClick(View view) {
-
         String email = binding.emailFieldId.getText().toString();
         String password = binding.passwordFieldId.getText().toString();
 
-        // Obtener el token de FCM
-        FCMTokenManager.getFCMTokenAndSaveToRealtimeDatabase(username);
         if (email.isEmpty() || password.isEmpty()) {
             Toast.makeText(Login.this, "Email and password are required", Toast.LENGTH_SHORT).show();
             return;
         }
-        System.out.println(email);
-        System.out.println(password);
 
         mAuth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithEmail:success");
                             FirebaseUser user = mAuth.getCurrentUser();
-                            Toast.makeText(Login.this, "Authentication successful.",
-                                    Toast.LENGTH_SHORT).show();
-                            // updateUI(user);
-
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                if (ContextCompat.checkSelfPermission(Login.this, "android.permission.POST_NOTIFICATIONS") !=
-                                        PackageManager.PERMISSION_GRANTED) {
-                                    ActivityCompat.requestPermissions(Login.this,
-                                            new String[]{"android.permission.POST_NOTIFICATIONS"}, 1);
-                                }
-                            }
-
-                            Intent intent = new Intent(Login.this, MainActivity.class);
-                            startActivity(intent);
-
+                            String username = UserUtils.getUsername();
+                            FCMTokenManager.getFCMTokenAndSaveToRealtimeDatabase(username);
+                            Toast.makeText(Login.this, "Authentication successful.", Toast.LENGTH_SHORT).show();
+                            checkNotificationPermission();
+                            goToMainActivity();
                         } else {
-                            // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInWithEmail:failure", task.getException());
                             Toast.makeText(Login.this, "Authentication failed: " + task.getException().getMessage(),
                                     Toast.LENGTH_SHORT).show();
-                            // updateUI(null);
                         }
                     }
                 });
+    }
+
+    private void goToMainActivity() {
+        Intent intent = new Intent(Login.this, MainActivity.class);
+        startActivity(intent);
+        finish(); // This prevents the user from coming back to the login screen with the back button
+    }
+
+    private void checkNotificationPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(Login.this, android.Manifest.permission.POST_NOTIFICATIONS) !=
+                    PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(Login.this,
+                        new String[]{android.Manifest.permission.POST_NOTIFICATIONS}, 1);
+            }
+        }
     }
 
     public void onRegisterClick(View view) {
@@ -111,10 +106,9 @@ public class Login extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == 1) {
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                // Permiso concedido, puedes inicializar aquí cualquier cosa relacionada con las notificaciones
+                // Permission granted, you can initialize anything related to notifications here
             } else {
-                // Permiso denegado, puedes informar al usuario sobre las limitaciones
-                Toast.makeText(this, "Las notificaciones están desactivadas", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Notifications are disabled", Toast.LENGTH_SHORT).show();
             }
         }
     }
