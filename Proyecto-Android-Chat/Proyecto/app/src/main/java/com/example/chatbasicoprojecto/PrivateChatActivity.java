@@ -165,11 +165,11 @@ public class PrivateChatActivity extends AppCompatActivity {
                                 @Override
                                 public void onSuccess(Uri uri) {
                                     String imageUrl = uri.toString();
+                                    // Enviar notificación
+                                    sendNotificationToRecipient(contactUsername, text);
                                     Message message = new Message(ownerUsername, text, imageUrl);
                                     databaseReference.child("privateChat").child(chatID)
                                             .child("messageList").child(messageKey).setValue(message);
-                                    // Enviar notificación
-                                    sendNotificationToRecipient(contactUsername, text);
                                 }
                             });
                         }
