@@ -7,12 +7,14 @@ public class User {
     private String username;
     private String email;
     private String fcmToken;
+    private String status;
 
     public User() {}
 
     public User(String email) {
         this.email = email;
         this.username = email.substring(0, email.indexOf('@'));
+        this.status = "offline";
     }
 
     public String getEmail() {
@@ -37,5 +39,13 @@ public class User {
 
     public void setFcmToken(String fcmToken) {
         this.fcmToken = fcmToken;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

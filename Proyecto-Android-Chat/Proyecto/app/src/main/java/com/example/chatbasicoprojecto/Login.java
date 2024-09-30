@@ -14,6 +14,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.example.chatbasicoprojecto.databinding.ActivityLoginBinding;
+import com.example.chatbasicoprojecto.encapsulaciones.User;
 import com.example.chatbasicoprojecto.notifications.FCMTokenManager;
 import com.example.chatbasicoprojecto.utils.UserUtils;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -28,6 +29,7 @@ public class Login extends AppCompatActivity {
     private ActivityLoginBinding binding;
     private FirebaseAuth mAuth;
     private static final String TAG = "LoginActivity";
+    private MainActivity mainActivity;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,4 +114,5 @@ public class Login extends AppCompatActivity {
             }
         }
     }
+
 }

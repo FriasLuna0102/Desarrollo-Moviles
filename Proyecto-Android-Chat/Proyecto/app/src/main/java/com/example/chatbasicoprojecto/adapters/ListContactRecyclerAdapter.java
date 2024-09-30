@@ -71,6 +71,7 @@ public class ListContactRecyclerAdapter extends RecyclerView.Adapter<ListContact
         TextView email;
         ShapeableImageView avatarImage;
         TextView avatarText;
+        View statusIndicator;
         OnItemClickListener onItemClickListener;
 
         public ViewHolder(@NonNull View itemView, OnItemClickListener onItemClickListener) {
@@ -81,6 +82,7 @@ public class ListContactRecyclerAdapter extends RecyclerView.Adapter<ListContact
             this.avatarText = itemView.findViewById(R.id.avatar_text);
             itemView.setOnClickListener(this);
             this.onItemClickListener = onItemClickListener;
+            statusIndicator = itemView.findViewById(R.id.status_indicator);
         }
 
         @Override
@@ -102,6 +104,13 @@ public class ListContactRecyclerAdapter extends RecyclerView.Adapter<ListContact
         holder.username.setText(user.getUsername());
         holder.email.setText(user.getEmail());
 
+        View statusIndicator = holder.itemView.findViewById(R.id.status_indicator);
+        if ("online".equals(user.getStatus())) {
+            statusIndicator.setBackgroundResource(R.color.status_online);
+        } else {
+            statusIndicator.setBackgroundResource(R.color.status_offline);
+        }
+
         // Genera las iniciales del nombre de usuario
         String initials = user.getUsername().substring(0, Math.min(user.getUsername().length(), 2)).toUpperCase();
         holder.avatarText.setText(initials);
@@ -116,4 +125,9 @@ public class ListContactRecyclerAdapter extends RecyclerView.Adapter<ListContact
     public int getItemCount() {
         return contactList.size();
     }
+
+    public List<User> contactList() {
+        return contactList;
+    }
+
 }

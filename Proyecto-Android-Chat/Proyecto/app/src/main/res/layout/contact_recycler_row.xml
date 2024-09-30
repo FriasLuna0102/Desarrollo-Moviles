@@ -47,7 +47,7 @@
             android:textColor="@color/text_primary"
             app:layout_constraintStart_toEndOf="@id/avatar_image"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            app:layout_constraintEnd_toStartOf="@id/status_indicator"/>
 
         <TextView
             android:id="@+id/email_add_contact"
@@ -60,7 +60,16 @@
             android:textColor="@color/text_secondary"
             app:layout_constraintStart_toEndOf="@id/avatar_image"
             app:layout_constraintTop_toBottomOf="@id/username_add_contact"
-            app:layout_constraintEnd_toEndOf="parent"/>
+            app:layout_constraintEnd_toStartOf="@id/status_indicator"/>
+
+        <View
+            android:id="@+id/status_indicator"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            android:background="@drawable/status_indicator"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
