@@ -6,6 +6,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -44,6 +45,8 @@ public class MainActivity extends AppCompatActivity implements ListContactRecycl
     private ListContactRecyclerAdapter listContactRecyclerAdapter;
     private String username = UserUtils.getUsername();
     private TextView userName;
+    private View noContactsView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -82,15 +85,56 @@ public class MainActivity extends AppCompatActivity implements ListContactRecycl
             getSupportActionBar().setDisplayShowTitleEnabled(false);
         }
 
+
+
+
         recyclerView = findViewById(R.id.mainList);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         listContactRecyclerAdapter = new ListContactRecyclerAdapter(this);
         recyclerView.setAdapter(listContactRecyclerAdapter);
+        noContactsView = findViewById(R.id.noContactsView);
+
+
+        updateContactList();
 
         userName = findViewById(R.id.userLayaoutName);
         userName.setText(username);
         setupStatusListener();
         updateUserStatus("online");
+
+    }
+
+    private void updateContactList() {
+        listContactRecyclerAdapter.fetchContacts();
+        listContactRecyclerAdapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
+            @Override
+            public void onChanged() {
+                super.onChanged();
+                checkEmpty();
+            }
+
+            @Override
+            public void onItemRangeInserted(int positionStart, int itemCount) {
+                super.onItemRangeInserted(positionStart, itemCount);
+                checkEmpty();
+            }
+
+            @Override
+            public void onItemRangeRemoved(int positionStart, int itemCount) {
+                super.onItemRangeRemoved(positionStart, itemCount);
+                checkEmpty();
+            }
+        });
+    }
+
+    private void checkEmpty() {
+        if (listContactRecyclerAdapter.getItemCount() == 0) {
+            recyclerView.setVisibility(View.GONE);
+            noContactsView.setVisibility(View.VISIBLE);
+        } else {
+            recyclerView.setVisibility(View.VISIBLE);
+            noContactsView.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -177,5 +221,6 @@ public class MainActivity extends AppCompatActivity implements ListContactRecycl
             }
         }
         listContactRecyclerAdapter.notifyDataSetChanged();
+        checkEmpty();
     }
 }
