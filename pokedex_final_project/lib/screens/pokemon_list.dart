@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import '../graphql/queries/pokemon_queries.dart';
+import 'pokemon_detail.dart';
 
 class PokemonList extends StatelessWidget {
   const PokemonList({super.key});
@@ -32,12 +33,37 @@ class PokemonList extends StatelessWidget {
             itemCount: pokemons.length,
             itemBuilder: (context, index) {
               final pokemon = pokemons[index];
-              return ListTile(
-                title: Text(pokemon['name']),
-                subtitle: Text('ID: ${pokemon['id']}'),
+              return Column(
+                children: [
+                  ListTile(
+                    title: GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PokemonDetail(pokemon: pokemon),
+                          ),
+                        );
+                      },
+                      child: Text(pokemon['name'], ),
+                    ),
+                    subtitle: Text('ID: ${pokemon['id']}'),
+                    leading: CircleAvatar(
+                      backgroundColor: Colors.blue,
+                      child: Text(pokemon['id'].toString().substring(0, 1)),
+                    ),
+                  ),
+                  const Divider(
+                    thickness: 1,
+                    color: Colors.grey,
+                    indent: 16,
+                    endIndent: 16,
+                  ), // Divider para marcar el final de cada elemento
+                ],
               );
             },
           );
+
         },
       ),
     );
