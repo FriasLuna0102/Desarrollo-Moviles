@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import '../graphql/queries/pokemon_queries.dart';
@@ -33,6 +35,9 @@ class PokemonList extends StatelessWidget {
             itemCount: pokemons.length,
             itemBuilder: (context, index) {
               final pokemon = pokemons[index];
+              final spritesJson = pokemon['pokemon_v2_pokemonsprites'][0]['sprites'];
+
+              final imageUrl = spritesJson['front_default'];
               return Column(
                 children: [
                   ListTile(
@@ -48,10 +53,8 @@ class PokemonList extends StatelessWidget {
                       child: Text(pokemon['name'], ),
                     ),
                     subtitle: Text('ID: ${pokemon['id']}'),
-                    leading: CircleAvatar(
-                      backgroundColor: Colors.blue,
-                      child: Text(pokemon['id'].toString().substring(0, 1)),
-                    ),
+                    leading: imageUrl != null ? Image.network(imageUrl) : const Icon(Icons.image_not_supported),
+
                   ),
                   const Divider(
                     thickness: 1,

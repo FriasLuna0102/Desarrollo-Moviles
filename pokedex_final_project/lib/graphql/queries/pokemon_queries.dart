@@ -5,6 +5,9 @@ const String queryPokemon = """
       name
       height
       weight
+      pokemon_v2_pokemonsprites {
+        sprites
+      }
     }
   }
 """;

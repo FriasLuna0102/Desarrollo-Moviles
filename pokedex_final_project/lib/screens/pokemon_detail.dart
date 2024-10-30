@@ -8,6 +8,14 @@ class PokemonDetail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    final spritesJson = pokemon['pokemon_v2_pokemonsprites'] != null
+        ? pokemon['pokemon_v2_pokemonsprites'][0]['sprites']
+        : null;
+
+    // Decodifica el JSON si existe
+
+    final imageUrl = spritesJson?['front_default'];
     return Scaffold(
       appBar: AppBar(
         title: Text(pokemon['name']),
@@ -21,6 +29,15 @@ class PokemonDetail extends StatelessWidget {
               "ID: ${pokemon['id']}",
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
+
+            const SizedBox(height: 8),
+            imageUrl != null
+                ? Image.network(
+              imageUrl,
+              width: 100,
+              height: 100,
+            )
+                : const Icon(Icons.image_not_supported, size: 100), // Muestra un ícono si no hay imagen
             const SizedBox(height: 8),
             Text(
               "Height: ${pokemon['height']}",
