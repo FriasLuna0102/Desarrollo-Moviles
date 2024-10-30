@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import '../graphql/queries/pokemon_queries.dart';
+import 'pokemon_detail.dart';
 
 class PokemonList extends StatelessWidget {
   const PokemonList({super.key});
@@ -32,12 +35,38 @@ class PokemonList extends StatelessWidget {
             itemCount: pokemons.length,
             itemBuilder: (context, index) {
               final pokemon = pokemons[index];
-              return ListTile(
-                title: Text(pokemon['name']),
-                subtitle: Text('ID: ${pokemon['id']}'),
+              final spritesJson = pokemon['pokemon_v2_pokemonsprites'][0]['sprites'];
+
+              final imageUrl = spritesJson['front_default'];
+              return Column(
+                children: [
+                  ListTile(
+                    title: GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PokemonDetail(pokemon: pokemon),
+                          ),
+                        );
+                      },
+                      child: Text(pokemon['name'], ),
+                    ),
+                    subtitle: Text('ID: ${pokemon['id']}'),
+                    leading: imageUrl != null ? Image.network(imageUrl) : const Icon(Icons.image_not_supported),
+
+                  ),
+                  const Divider(
+                    thickness: 1,
+                    color: Colors.grey,
+                    indent: 16,
+                    endIndent: 16,
+                  ), // Divider para marcar el final de cada elemento
+                ],
               );
             },
           );
+
         },
       ),
     );
