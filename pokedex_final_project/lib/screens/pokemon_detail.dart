@@ -1,14 +1,21 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 
-class PokemonDetail extends StatelessWidget {
+class PokemonDetail extends StatefulWidget {
   final Map<String, dynamic> pokemon;
 
   const PokemonDetail({super.key, required this.pokemon});
 
+  @override
+  State<PokemonDetail> createState() => _PokemonDetailState();
+}
+
+class _PokemonDetailState extends State<PokemonDetail> {
+  bool isFavorite = false;
+
   Color getTypeColor(String type) {
     final typeColors = {
-      'normal': Colors.grey[400]!,
+      'normal': Colors.grey[700]!,
       'fire': Colors.orange,
       'water': Colors.blue,
       'grass': Colors.green,
@@ -17,7 +24,7 @@ class PokemonDetail extends StatelessWidget {
       'fighting': Colors.red[800]!,
       'poison': Colors.purple,
       'ground': Colors.brown,
-      'flying': Colors.indigo[200]!,
+      'flying': Colors.indigo[400]!,
       'psychic': Colors.pink,
       'bug': Colors.lightGreen,
       'rock': Colors.brown[300]!,
@@ -32,34 +39,36 @@ class PokemonDetail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final spritesJson = pokemon['pokemon_v2_pokemonsprites'] != null
-        ? pokemon['pokemon_v2_pokemonsprites'][0]['sprites']
+    final spritesJson = widget.pokemon['pokemon_v2_pokemonsprites'] != null
+        ? widget.pokemon['pokemon_v2_pokemonsprites'][0]['sprites']
         : null;
 
     final imageUrl = spritesJson?['front_default'];
-    final types = pokemon['pokemon_v2_pokemontypes'] ?? [];
-    final stats = pokemon['pokemon_v2_pokemonstats'] ?? [];
+    final types = widget.pokemon['pokemon_v2_pokemontypes'] ?? [];
+    final stats = widget.pokemon['pokemon_v2_pokemonstats'] ?? [];
+    final pokemonAbilities = widget.pokemon['pokemon_v2_pokemonabilities'] ?? [];
+
+    final primaryType = types.isNotEmpty ? types[0]['pokemon_v2_type']['name'] : 'normal';
+    final primaryColor = getTypeColor(primaryType);
 
     return Scaffold(
+
+
       backgroundColor: Colors.grey[100],
-      appBar: AppBar(
-        title: Text(
-          pokemon['name'].toString().toUpperCase(),
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.star_border),
-            onPressed: () {},
-          ),
-        ],
-      ),
       body: SingleChildScrollView(
         child: Column(
           children: [
+            const SizedBox(height: 30),
             Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    getTypeColor(types.isNotEmpty ? types[0]['pokemon_v2_type']['name'] : 'normal').withOpacity(0.7),
+                    getTypeColor(types.isNotEmpty ? types[0]['pokemon_v2_type']['name'] : 'normal').withOpacity(0.3),
+                  ],
+                ),
                 borderRadius: BorderRadius.circular(20),
               ),
               margin: const EdgeInsets.all(16),
@@ -74,15 +83,35 @@ class PokemonDetail extends StatelessWidget {
                         child: Align(
                           alignment: Alignment.center,
                           child: Text(
-                            'PC${pokemon['id']}',
+                            'PC${widget.pokemon['id']}',
                             style: const TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
+                              color: Colors.white,
                             ),
                           ),
                         ),
                       ),
-                      const Icon(Icons.camera_alt_outlined),
+                      Row(
+                        children: [
+                          IconButton(
+                            icon: AnimatedSwitcher(
+                              duration: const Duration(milliseconds: 300),
+                              child: Icon(
+                                isFavorite ? Icons.star : Icons.star_border,
+                                key: ValueKey<bool>(isFavorite),
+                                color: Colors.white,
+                                size: 28,
+                              ),
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                isFavorite = !isFavorite;
+                              });
+                            },
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -94,23 +123,37 @@ class PokemonDetail extends StatelessWidget {
                       fit: BoxFit.contain,
                     ),
 
+                  Text(
+                    widget.pokemon['name'].toString().toUpperCase(),
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+
+                  const SizedBox(height: 30),
                   // Types
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      for (var type in types)
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 4),
-                          child: Chip(
-                            backgroundColor: getTypeColor(
-                              type['pokemon_v2_type']['name'],
+                      Row(
+                        children: [
+                          for (var type in types)
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 4),
+                              child: Chip(
+                                backgroundColor: getTypeColor(
+                                  type['pokemon_v2_type']['name'],
+                                ),
+                                label: Text(
+                                  type['pokemon_v2_type']['name'].toString().toUpperCase(),
+                                  style: const TextStyle(color: Colors.white),
+                                ),
+                              ),
                             ),
-                            label: Text(
-                              type['pokemon_v2_type']['name'].toString().toUpperCase(),
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                          ),
-                        ),
+                        ],
+                      ),
                     ],
                   ),
 
@@ -122,37 +165,46 @@ class PokemonDetail extends StatelessWidget {
                       Column(
                         children: [
                           Text(
-                            '${pokemon['weight'] / 10}kg',
+                            '${widget.pokemon['weight'] / 10}kg',
                             style: const TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
+                              color: Colors.white,
                             ),
                           ),
-                          const Text('PESO'),
+                          const Text('PESO',
+                            style: TextStyle(color: Colors.white),
+                          ),
                         ],
                       ),
                       Column(
                         children: [
                           Text(
-                            '${pokemon['height'] / 10}m',
+                            '${widget.pokemon['height'] / 10}m',
                             style: const TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
+                              color: Colors.white,
                             ),
                           ),
-                          const Text('ALTURA'),
+                          const Text('ALTURA',
+                            style: TextStyle(color: Colors.white),
+                          ),
                         ],
                       ),
                       Column(
                         children: [
                           Text(
-                            '${pokemon['height'] / 10}m',
+                            '${widget.pokemon['height'] / 10}m',
                             style: const TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
+                              color: Colors.white,
                             ),
                           ),
-                          const Text('ALTURA'),
+                          const Text('ALTURA',
+                            style: TextStyle(color: Colors.white),
+                          ),
                         ],
                       ),
                     ],
@@ -171,12 +223,15 @@ class PokemonDetail extends StatelessWidget {
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+
                 children: [
-                  const Text(
-                    'ESTADÍSTICAS',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                  const Center(
+                    child: Text(
+                      'ESTADÍSTICAS',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -204,9 +259,40 @@ class PokemonDetail extends StatelessWidget {
                       ),
                     ),
                 ],
+
               ),
             ),
-          ],
+            const SizedBox(height: 16),
+            const Text(
+              'HABILIDADES',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            // Recuadros de habilidades
+
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              for (var ability in pokemonAbilities)
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  child: Chip(
+                    backgroundColor: getTypeColor(
+                      primaryType,
+                    ),
+                    label: Text(
+                      ability['pokemon_v2_ability']['name'].toString().toUpperCase(),
+                      style: const TextStyle(color: Colors.white),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+      ],
         ),
       ),
     );
