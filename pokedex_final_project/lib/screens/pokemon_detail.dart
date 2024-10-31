@@ -52,13 +52,23 @@ class _PokemonDetailState extends State<PokemonDetail> {
     final primaryColor = getTypeColor(primaryType);
 
     return Scaffold(
+
+
       backgroundColor: Colors.grey[100],
       body: SingleChildScrollView(
         child: Column(
           children: [
+            const SizedBox(height: 30),
             Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    getTypeColor(types.isNotEmpty ? types[0]['pokemon_v2_type']['name'] : 'normal').withOpacity(0.7),
+                    getTypeColor(types.isNotEmpty ? types[0]['pokemon_v2_type']['name'] : 'normal').withOpacity(0.3),
+                  ],
+                ),
                 borderRadius: BorderRadius.circular(20),
               ),
               margin: const EdgeInsets.all(16),
@@ -77,6 +87,7 @@ class _PokemonDetailState extends State<PokemonDetail> {
                             style: const TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.bold,
+                              color: Colors.white,
                             ),
                           ),
                         ),
@@ -89,7 +100,7 @@ class _PokemonDetailState extends State<PokemonDetail> {
                               child: Icon(
                                 isFavorite ? Icons.star : Icons.star_border,
                                 key: ValueKey<bool>(isFavorite),
-                                color: isFavorite ? Colors.amber : Colors.grey,
+                                color: Colors.white,
                                 size: 28,
                               ),
                             ),
@@ -112,18 +123,17 @@ class _PokemonDetailState extends State<PokemonDetail> {
                       fit: BoxFit.contain,
                     ),
 
-
-
                   Text(
                     widget.pokemon['name'].toString().toUpperCase(),
                     style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
+                      color: Colors.white,
                     ),
                   ),
 
                   const SizedBox(height: 30),
-                  // Types and Favorite Button
+                  // Types
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -144,7 +154,6 @@ class _PokemonDetailState extends State<PokemonDetail> {
                             ),
                         ],
                       ),
-
                     ],
                   ),
 
@@ -160,9 +169,12 @@ class _PokemonDetailState extends State<PokemonDetail> {
                             style: const TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
+                              color: Colors.white,
                             ),
                           ),
-                          const Text('PESO'),
+                          const Text('PESO',
+                            style: TextStyle(color: Colors.white),
+                          ),
                         ],
                       ),
                       Column(
@@ -172,9 +184,12 @@ class _PokemonDetailState extends State<PokemonDetail> {
                             style: const TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
+                              color: Colors.white,
                             ),
                           ),
-                          const Text('ALTURA'),
+                          const Text('ALTURA',
+                            style: TextStyle(color: Colors.white),
+                          ),
                         ],
                       ),
                       Column(
@@ -184,9 +199,12 @@ class _PokemonDetailState extends State<PokemonDetail> {
                             style: const TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
+                              color: Colors.white,
                             ),
                           ),
-                          const Text('ALTURA'),
+                          const Text('ALTURA',
+                            style: TextStyle(color: Colors.white),
+                          ),
                         ],
                       ),
                     ],
