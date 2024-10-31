@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import 'features/screens/pokemon_list.dart';
 import 'graphql/client.dart';
-import 'screens/pokemon_list.dart';
 
 void main() {
   final ValueNotifier<GraphQLClient> client = setupGraphQLClient();
