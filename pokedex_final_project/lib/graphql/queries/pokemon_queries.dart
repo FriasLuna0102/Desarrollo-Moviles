@@ -33,6 +33,19 @@ const String queryPokemon = """
         }
       }
     }
+    
+    pokemon_v2_pokemonmoves(limit: 4) {
+      level
+      pokemon_v2_move {
+        name
+        power
+        accuracy
+        pp
+        pokemon_v2_type {
+          name
+        }
+      }
+    }
   }
   }
 """;

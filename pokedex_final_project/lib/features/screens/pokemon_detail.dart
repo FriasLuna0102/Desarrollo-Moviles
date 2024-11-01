@@ -8,6 +8,7 @@ import '../../core/models/pokemon_evolutions.dart';
 import '../../core/theme/pokemon_colors.dart';
 import '../../graphql/queries/pokemon_detail_by_id.dart';
 import '../pokemon/widgets/pokemon_metric_card.dart';
+import '../pokemon/widgets/pokemon_moves_widget.dart';
 import '../pokemon/widgets/pokemon_stat_bar.dart';
 import '../pokemon/widgets/pokemon_type_chip.dart';
 
@@ -39,6 +40,7 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
             _buildAbilitiesSection(),
             const SizedBox(height: 16),
             _buildEvolutionSection(),
+            _buildMovesSection(),
           ],
         ),
       ),
@@ -283,6 +285,19 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildMovesSection() {
+    return Column(
+      children: [
+        const SizedBox(height: 16),
+        PokemonMovesWidget(
+          moves: widget.pokemon.moves,
+          backgroundColor: PokemonColors.getTypeColor(widget.pokemon.types.first.name),
+        ),
+        const SizedBox(height: 16),
+      ],
     );
   }
 

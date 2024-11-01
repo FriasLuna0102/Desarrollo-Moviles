@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:pokedex_final_project/core/models/pokemon_ability.dart';
 import 'package:pokedex_final_project/core/models/pokemon_evolutions.dart';
+import 'package:pokedex_final_project/core/models/pokemon_move.dart';
 import 'package:pokedex_final_project/core/models/pokemon_stat.dart';
 import 'package:pokedex_final_project/core/models/pokemon_type.dart';
 
@@ -15,6 +16,7 @@ class Pokemon {
   final double weight;
   final double height;
   final List<PokemonEvolution> evolutions;
+  final List<PokemonMove> moves;
 
   Pokemon({
     required this.id,
@@ -26,6 +28,7 @@ class Pokemon {
     required this.weight,
     required this.height,
     required this.evolutions,
+    required this.moves,
   });
 
   factory Pokemon.fromJson(Map<String, dynamic> json) {
@@ -78,6 +81,9 @@ class Pokemon {
       evolutions: evolutionsList,
       weight: (json['weight'] ?? 0) / 10,
       height: (json['height'] ?? 0) / 10,
+      moves: (json['pokemon_v2_pokemonmoves'] as List?)
+          ?.map((move) => PokemonMove.fromJson(move))
+          .toList() ?? [],
     );
   }
 }
