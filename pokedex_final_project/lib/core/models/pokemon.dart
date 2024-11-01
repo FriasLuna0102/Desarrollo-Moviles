@@ -5,6 +5,7 @@ import 'package:pokedex_final_project/core/models/pokemon_evolutions.dart';
 import 'package:pokedex_final_project/core/models/pokemon_move.dart';
 import 'package:pokedex_final_project/core/models/pokemon_stat.dart';
 import 'package:pokedex_final_project/core/models/pokemon_type.dart';
+import 'package:pokedex_final_project/core/models/pokemon_type_relations.dart';
 
 class Pokemon {
   final int id;
@@ -17,6 +18,7 @@ class Pokemon {
   final double height;
   final List<PokemonEvolution> evolutions;
   final List<PokemonMove> moves;
+  final PokemonTypeRelations typeRelations;
 
   Pokemon({
     required this.id,
@@ -29,6 +31,7 @@ class Pokemon {
     required this.height,
     required this.evolutions,
     required this.moves,
+    required this.typeRelations,
   });
 
   factory Pokemon.fromJson(Map<String, dynamic> json) {
@@ -45,6 +48,11 @@ class Pokemon {
     } catch (e) {
       spriteUrl = null;
     }
+
+    final List<Map<String, dynamic>> typesForRelations =
+        (json['pokemon_v2_pokemontypes'] as List?)
+            ?.map((type) => Map<String, dynamic>.from(type))
+            .toList() ?? [];
 
     List<PokemonEvolution> evolutionsList = [];
     try {
@@ -84,6 +92,8 @@ class Pokemon {
       moves: (json['pokemon_v2_pokemonmoves'] as List?)
           ?.map((move) => PokemonMove.fromJson(move))
           .toList() ?? [],
+      typeRelations: PokemonTypeRelations.fromTypes(typesForRelations),
     );
+
   }
 }

@@ -8,7 +8,7 @@ Future<Pokemon> fetchPokemonDetails(int id) async {
   const String queryPokemonById = """
   query getPokemonById(\$id: Int!) {
     pokemon_v2_pokemon(where: {id: {_eq: \$id}}) {
-      id
+       id
       name
       height
       weight
@@ -18,6 +18,26 @@ Future<Pokemon> fetchPokemonDetails(int id) async {
       pokemon_v2_pokemontypes {
         pokemon_v2_type {
           name
+          pokemonV2TypeefficaciesByTargetTypeId(
+            limit: 4,
+            where: {damage_factor: {_gt: 100}},
+            order_by: {damage_factor: desc}
+          ) {
+            damage_factor
+            pokemon_v2_type {
+              name
+            }
+          }
+          pokemon_v2_typeefficacies(
+            limit: 4,
+            where: {damage_factor: {_gt: 100}},
+            order_by: {damage_factor: desc}
+          ) {
+            damage_factor
+            pokemonV2TypeByTargetTypeId {
+              name
+            }
+          }
         }
       }
       pokemon_v2_pokemonstats {
@@ -40,20 +60,25 @@ Future<Pokemon> fetchPokemonDetails(int id) async {
           }
         }
       }
-      
-      pokemon_v2_pokemonmoves(limit: 4) {
-      level
-      pokemon_v2_move {
-        name
-        power
-        accuracy
-        pp
-        pokemon_v2_type {
+      pokemon_v2_pokemonmoves(
+        where: {
+          move_learn_method_id: {_eq: 1},
+          level: {_gt: 0}
+        },
+        order_by: {level: asc},
+        limit: 4
+      ) {
+        level
+        pokemon_v2_move {
           name
+          power
+          accuracy
+          pp
+          pokemon_v2_type {
+            name
+          }
         }
       }
-    }
-      
     }
   }
 """;

@@ -11,6 +11,7 @@ import '../pokemon/widgets/pokemon_metric_card.dart';
 import '../pokemon/widgets/pokemon_moves_widget.dart';
 import '../pokemon/widgets/pokemon_stat_bar.dart';
 import '../pokemon/widgets/pokemon_type_chip.dart';
+import '../pokemon/widgets/pokemon_type_relations_widget.dart';
 
 
 class PokemonDetailScreen extends StatefulWidget {
@@ -36,6 +37,8 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
             _buildHeaderCard(),
             const SizedBox(height: 16),
             _buildStatsSection(),
+            const SizedBox(height: 16),
+            _buildTypeRelationsSection(),
             const SizedBox(height: 16),
             _buildAbilitiesSection(),
             const SizedBox(height: 16),
@@ -474,6 +477,51 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                 ),
               );
             }).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTypeRelationsSection() {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            PokemonColors.getTypeColor(widget.pokemon.types.first.name).withOpacity(0.7),
+            PokemonColors.getTypeColor(widget.pokemon.types.first.name).withOpacity(0.3),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Center(
+            child: Text(
+              'RELACIONES DE TIPO',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          PokemonTypeRelationsWidget(
+            relations: widget.pokemon.typeRelations,
+            backgroundColor: PokemonColors.getTypeColor(widget.pokemon.types.first.name),
           ),
         ],
       ),
