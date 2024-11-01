@@ -1,9 +1,11 @@
 // lib/features/pokemon/screens/pokemon_detail_screen.dart
 
 import 'package:flutter/material.dart';
+import 'package:pokedex_final_project/features/screens/pokemon_list.dart';
 import '../../core/models/pokemon.dart';
 import '../../core/models/pokemon_evolutions.dart';
 import '../../core/theme/pokemon_colors.dart';
+import '../../graphql/queries/pokemon_detail_by_id.dart';
 import '../pokemon/widgets/pokemon_metric_card.dart';
 import '../pokemon/widgets/pokemon_stat_bar.dart';
 import '../pokemon/widgets/pokemon_type_chip.dart';
@@ -82,6 +84,24 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
+        // Botón de retroceso
+        IconButton(
+          icon: const Icon(
+            Icons.arrow_back,
+            color: Colors.white,
+            size: 28,
+          ),
+          onPressed: () {
+
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const PokemonList(),
+              ),
+            );
+          },
+        ),
+        // ID del Pokémon
         Expanded(
           child: Center(
             child: Text(
@@ -94,6 +114,7 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
             ),
           ),
         ),
+        // Botón de favorito
         IconButton(
           icon: AnimatedSwitcher(
             duration: const Duration(milliseconds: 300),
@@ -301,92 +322,106 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
   }
 
   Widget _buildEvolutionItem(PokemonEvolution evolution, int number) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        // Círculo con la imagen del Pokémon
-        Stack(
-          alignment: Alignment.center,
-          children: [
-            Container(
-              width: 100,
-              height: 100,
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.9),
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: Colors.grey[300]!,
-                  width: 2,
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.2),
-                    blurRadius: 8,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
+    return InkWell( // o GestureDetector
+      onTap: () async {
+        // Primero obtenemos los detalles del Pokémon
+        final pokemon = await fetchPokemonDetails(evolution.id);
+        if (context.mounted) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => PokemonDetailScreen(pokemon: pokemon),
             ),
-            ClipOval(
-              child: Image.network(
-                'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${evolution.id}.png',
-                width: 80,
-                height: 80,
-                fit: BoxFit.contain,
-                errorBuilder: (context, error, stackTrace) {
-                  return const Center(
-                    child: Icon(
-                      Icons.catching_pokemon,
-                      size: 40,
-                      color: Colors.grey,
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Text(
-          evolution.name.toUpperCase(),
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 11,
-          ),
-        ),
-        Text(
-          'N.º ${evolution.id.toString().padLeft(4, '0')}',
-          style: const TextStyle(
-            color: Colors.amberAccent,
-            fontSize: 14,
-          ),
-        ),
-        const SizedBox(height: 4),
-        const SizedBox(height: 4),
-        Column(
-          mainAxisSize: MainAxisSize.min,
-          children: widget.pokemon.types.map((type) {
-            return Padding(
-              padding: const EdgeInsets.symmetric(vertical: 2),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+          );
+        }
+      },
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Círculo con la imagen del Pokémon
+          Stack(
+            alignment: Alignment.center,
+            children: [
+              Container(
+                width: 100,
+                height: 100,
                 decoration: BoxDecoration(
-                  color: PokemonColors.getTypeColor(type.name),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  type.name.toUpperCase(),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
+                  color: Colors.white.withOpacity(0.9),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: Colors.grey[300]!,
+                    width: 2,
                   ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
               ),
-            );
-          }).toList(),
-        ),
-      ],
+              ClipOval(
+                child: Image.network(
+                  'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${evolution.id}.png',
+                  width: 80,
+                  height: 80,
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) {
+                    return const Center(
+                      child: Icon(
+                        Icons.catching_pokemon,
+                        size: 40,
+                        color: Colors.grey,
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(
+            evolution.name.toUpperCase(),
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 11,
+            ),
+          ),
+          Text(
+            'N.º ${evolution.id.toString().padLeft(4, '0')}',
+            style: const TextStyle(
+              color: Colors.amberAccent,
+              fontSize: 14,
+            ),
+          ),
+          const SizedBox(height: 4),
+          const SizedBox(height: 4),
+          Column(
+            mainAxisSize: MainAxisSize.min,
+            children: widget.pokemon.types.map((type) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 2),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: PokemonColors.getTypeColor(type.name),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    type.name.toUpperCase(),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 10,
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ],
+      ),
     );
   }
 

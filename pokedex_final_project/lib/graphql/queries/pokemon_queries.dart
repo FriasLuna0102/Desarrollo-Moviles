@@ -1,6 +1,6 @@
 const String queryPokemon = """
   query {
-  pokemon_v2_pokemon(limit: 20) {
+  pokemon_v2_pokemon(limit: 10) {
     id
     name
     height
