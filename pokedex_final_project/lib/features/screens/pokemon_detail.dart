@@ -1,6 +1,7 @@
 // lib/features/pokemon/screens/pokemon_detail_screen.dart
 
 import 'package:flutter/material.dart';
+import 'package:pokedex_final_project/core/theme/trasantions/trasation_custom.dart';
 import 'package:pokedex_final_project/features/screens/pokemon_list.dart';
 import '../../core/models/pokemon.dart';
 import '../../core/models/pokemon_evolutions.dart';
@@ -91,15 +92,8 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
             color: Colors.white,
             size: 28,
           ),
-          onPressed: () {
+          onPressed: () => context.goToPokemonList(),
 
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (context) => const PokemonList(),
-              ),
-            );
-          },
         ),
         // ID del Pokémon
         Expanded(
@@ -322,17 +316,33 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
   }
 
   Widget _buildEvolutionItem(PokemonEvolution evolution, int number) {
-    return InkWell( // o GestureDetector
+    return InkWell(
       onTap: () async {
-        // Primero obtenemos los detalles del Pokémon
-        final pokemon = await fetchPokemonDetails(evolution.id);
-        if (context.mounted) {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => PokemonDetailScreen(pokemon: pokemon),
-            ),
+        try {
+          showDialog(
+            context: context,
+            barrierDismissible: false,
+            builder: (BuildContext context) {
+              return const Center(child: CircularProgressIndicator());
+            },
           );
+
+          final pokemon = await fetchPokemonDetails(evolution.id);
+
+          if (context.mounted) {
+            Navigator.pop(context); // Cerrar el loading
+            context.goToPokemonDetail(pokemon); // Usando la extensión
+          }
+        } catch (e) {
+          if (context.mounted) {
+            Navigator.pop(context);
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text('Error al cargar los detalles: $e'),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
         }
       },
       child: Column(
