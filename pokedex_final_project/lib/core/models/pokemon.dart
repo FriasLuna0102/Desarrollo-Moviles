@@ -1,8 +1,9 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:pokedex_final_project/core/models/pokemon_ability.dart';
+import 'package:pokedex_final_project/core/models/pokemon_evolutions.dart';
 import 'package:pokedex_final_project/core/models/pokemon_stat.dart';
 import 'package:pokedex_final_project/core/models/pokemon_type.dart';
-
 
 class Pokemon {
   final int id;
@@ -13,6 +14,7 @@ class Pokemon {
   final List<PokemonAbility> abilities;
   final double weight;
   final double height;
+  final List<PokemonEvolution> evolutions;
 
   Pokemon({
     required this.id,
@@ -23,15 +25,47 @@ class Pokemon {
     required this.abilities,
     required this.weight,
     required this.height,
+    required this.evolutions,
   });
 
   factory Pokemon.fromJson(Map<String, dynamic> json) {
-    final spritesJson = json['pokemon_v2_pokemonsprites']?[0]?['sprites'];
+    // Manejo de sprites
+    String? spriteUrl;
+    try {
+      final spritesJson = json['pokemon_v2_pokemonsprites']?[0]?['sprites'];
+      if (spritesJson != null) {
+        // Si spritesJson es un String, necesitamos parsearlo
+        final Map<String, dynamic> spritesMap =
+        spritesJson is String ? jsonDecode(spritesJson) : spritesJson;
+        spriteUrl = spritesMap['front_default'];
+      }
+    } catch (e) {
+      spriteUrl = null;
+    }
+
+    List<PokemonEvolution> evolutionsList = [];
+    try {
+      final speciesData = json['pokemon_v2_pokemonspecy'];
+      if (speciesData != null &&
+          speciesData['pokemon_v2_evolutionchain'] != null &&
+          speciesData['pokemon_v2_evolutionchain']['pokemon_v2_pokemonspecies'] != null) {
+
+        final List<dynamic> species =
+        speciesData['pokemon_v2_evolutionchain']['pokemon_v2_pokemonspecies'];
+
+        evolutionsList = species.map((speciesJson) => PokemonEvolution(
+          id: speciesJson['id'],
+          name: speciesJson['name'],
+        )).toList();
+      }
+    } catch (e) {
+      print('Error parsing evolutions: $e');
+    }
 
     return Pokemon(
       id: json['id'],
       name: json['name'],
-      imageUrl: spritesJson?['front_default'],
+      imageUrl: spriteUrl,
       types: (json['pokemon_v2_pokemontypes'] as List?)
           ?.map((type) => PokemonType.fromJson(type))
           .toList() ?? [],
@@ -41,6 +75,7 @@ class Pokemon {
       abilities: (json['pokemon_v2_pokemonabilities'] as List?)
           ?.map((ability) => PokemonAbility.fromJson(ability))
           .toList() ?? [],
+      evolutions: evolutionsList,
       weight: (json['weight'] ?? 0) / 10,
       height: (json['height'] ?? 0) / 10,
     );
