@@ -1,5 +1,3 @@
-// lib/features/pokemon/screens/pokemon_list_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
 import 'package:pokedex_final_project/features/screens/pokemon_detail.dart';
