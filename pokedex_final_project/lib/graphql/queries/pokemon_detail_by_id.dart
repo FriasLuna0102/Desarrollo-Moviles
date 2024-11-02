@@ -59,6 +59,9 @@ Future<Pokemon> fetchPokemonDetails(int id) async {
             order
           }
         }
+          pokemon_v2_pokemonspeciesnames(where: {language_id: {_eq: 9}}) {
+          genus
+        }
       }
       pokemon_v2_pokemonmoves(
         where: {

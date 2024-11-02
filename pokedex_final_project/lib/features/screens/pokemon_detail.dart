@@ -173,8 +173,9 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
           label: 'ALTURA',
         ),
         PokemonMetricCard(
-          value: '${widget.pokemon.height}m',
-          label: 'ALTURA',
+          value: '${widget.pokemon.genus}m',
+
+          label: 'Categoria',
         ),
       ],
     );

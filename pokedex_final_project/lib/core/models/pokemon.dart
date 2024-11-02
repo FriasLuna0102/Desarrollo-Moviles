@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:flutter/material.dart';
 import 'package:pokedex_final_project/core/models/pokemon_ability.dart';
 import 'package:pokedex_final_project/core/models/pokemon_evolutions.dart';
 import 'package:pokedex_final_project/core/models/pokemon_move.dart';
@@ -19,6 +18,7 @@ class Pokemon {
   final List<PokemonEvolution> evolutions;
   final List<PokemonMove> moves;
   final PokemonTypeRelations typeRelations;
+  final String genus;
 
   Pokemon({
     required this.id,
@@ -32,6 +32,7 @@ class Pokemon {
     required this.evolutions,
     required this.moves,
     required this.typeRelations,
+    required this.genus,
   });
 
   factory Pokemon.fromJson(Map<String, dynamic> json) {
@@ -73,6 +74,8 @@ class Pokemon {
       print('Error parsing evolutions: $e');
     }
 
+
+
     return Pokemon(
       id: json['id'],
       name: json['name'],
@@ -93,6 +96,7 @@ class Pokemon {
           ?.map((move) => PokemonMove.fromJson(move))
           .toList() ?? [],
       typeRelations: PokemonTypeRelations.fromTypes(typesForRelations),
+      genus: json['pokemon_v2_pokemonspecy']['pokemon_v2_pokemonspeciesnames'][0]['genus'],
     );
 
   }
