@@ -44,7 +44,9 @@ class Pokemon {
         // Si spritesJson es un String, necesitamos parsearlo
         final Map<String, dynamic> spritesMap =
         spritesJson is String ? jsonDecode(spritesJson) : spritesJson;
-        spriteUrl = spritesMap['front_default'];
+
+        // Accedemos a la ruta 'other' -> 'home' -> 'front_default'
+        spriteUrl = spritesMap['other']?['home']?['front_default'];
       }
     } catch (e) {
       spriteUrl = null;
