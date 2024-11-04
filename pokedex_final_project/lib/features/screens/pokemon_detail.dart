@@ -422,7 +422,7 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
               ),
               ClipOval(
                 child: Image.network(
-                  'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${evolution.id}.png',
+                  'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/${evolution.id}.png',
                   width: 80,
                   height: 80,
                   fit: BoxFit.contain,
