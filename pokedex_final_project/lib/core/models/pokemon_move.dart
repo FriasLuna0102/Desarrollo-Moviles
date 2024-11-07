@@ -1,5 +1,3 @@
-// lib/core/models/pokemon_move.dart
-
 class PokemonMove {
   final String name;
   final int? power;

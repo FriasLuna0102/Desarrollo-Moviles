@@ -1,12 +1,10 @@
-// lib/features/pokemon/screens/pokemon_detail_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:pokedex_final_project/core/theme/trasantions/trasation_custom.dart';
-import 'package:pokedex_final_project/features/screens/pokemon_list.dart';
 import '../../core/models/pokemon.dart';
 import '../../core/models/pokemon_evolutions.dart';
 import '../../core/theme/pokemon_colors.dart';
 import '../../graphql/queries/pokemon_detail_by_id.dart';
+import '../pokemon/widgets/pokemon_mega_evolutions.dart';
 import '../pokemon/widgets/pokemon_metric_card.dart';
 import '../pokemon/widgets/pokemon_moves_widget.dart';
 import '../pokemon/widgets/pokemon_stat_bar.dart';
@@ -26,6 +24,24 @@ class PokemonDetailScreen extends StatefulWidget {
 class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
   bool isFavorite = false;
 
+  Widget _buildMegaEvolutionsSection() {
+    if (widget.pokemon.megaEvolutions.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+
+    return Column(
+      children: [
+        PokemonMegaEvolutionSection(
+          megaEvolutions: widget.pokemon.megaEvolutions,
+          backgroundColor: PokemonColors.getTypeColor(widget.pokemon.types.first.name),
+          pokemon: widget.pokemon,
+        ),
+        const SizedBox(height: 16),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -43,6 +59,8 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
             _buildAbilitiesSection(),
             const SizedBox(height: 16),
             _buildEvolutionSection(),
+            const SizedBox(height: 16),
+            _buildMegaEvolutionsSection(),
             const SizedBox(height: 16),
             _buildMovesSection(),
           ],
@@ -293,48 +311,6 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
     );
   }
 
-  Widget _buildMovesSection() {
-    if (widget.pokemon.moves.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    List<Color> gradientColors = widget.pokemon.types.length > 1
-        ? [
-      PokemonColors.getTypeColor(widget.pokemon.types[0].name),
-      PokemonColors.getTypeColor(widget.pokemon.types[1].name),
-    ]
-        : [
-      PokemonColors.getTypeColor(widget.pokemon.types[0].name).withOpacity(0.7),
-      PokemonColors.getTypeColor(widget.pokemon.types[0].name).withOpacity(0.3),
-    ];
-
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: gradientColors,
-        ),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Padding(
-            padding: EdgeInsets.only(left: 16, bottom: 16),
-
-          ),
-          PokemonMovesWidget(
-            moves: widget.pokemon.moves,
-            backgroundColor: PokemonColors.getTypeColor(widget.pokemon.types.first.name),
-          ),
-        ],
-      ),
-    );
-  }
-
   List<Widget> _buildEvolutionChain() {
     List<Widget> evolutionWidgets = [];
 
@@ -379,7 +355,7 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
           final pokemon = await fetchPokemonDetails(evolution.id);
 
           if (context.mounted) {
-            Navigator.pop(context); // Cerrar el loading
+            Navigator.pop(context);
             context.goToPokemonDetail(pokemon);
           }
         } catch (e) {
@@ -478,6 +454,49 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
                 ),
               );
             }).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+
+  Widget _buildMovesSection() {
+    if (widget.pokemon.moves.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    List<Color> gradientColors = widget.pokemon.types.length > 1
+        ? [
+      PokemonColors.getTypeColor(widget.pokemon.types[0].name),
+      PokemonColors.getTypeColor(widget.pokemon.types[1].name),
+    ]
+        : [
+      PokemonColors.getTypeColor(widget.pokemon.types[0].name).withOpacity(0.7),
+      PokemonColors.getTypeColor(widget.pokemon.types[0].name).withOpacity(0.3),
+    ];
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: gradientColors,
+        ),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.only(left: 16, bottom: 16),
+
+          ),
+          PokemonMovesWidget(
+            moves: widget.pokemon.moves,
+            backgroundColor: PokemonColors.getTypeColor(widget.pokemon.types.first.name),
           ),
         ],
       ),

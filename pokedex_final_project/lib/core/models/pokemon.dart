@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:pokedex_final_project/core/models/pokemon_ability.dart';
 import 'package:pokedex_final_project/core/models/pokemon_evolutions.dart';
+import 'package:pokedex_final_project/core/models/pokemon_mega_evolutions.dart';
 import 'package:pokedex_final_project/core/models/pokemon_move.dart';
 import 'package:pokedex_final_project/core/models/pokemon_stat.dart';
 import 'package:pokedex_final_project/core/models/pokemon_type.dart';
@@ -19,6 +20,7 @@ class Pokemon {
   final List<PokemonMove> moves;
   final PokemonTypeRelations typeRelations;
   final String genus;
+  final List<PokemonMegaEvolution> megaEvolutions;
 
   Pokemon({
     required this.id,
@@ -33,6 +35,7 @@ class Pokemon {
     required this.moves,
     required this.typeRelations,
     required this.genus,
+    required this.megaEvolutions,
   });
 
   factory Pokemon.fromJson(Map<String, dynamic> json) {
@@ -76,6 +79,45 @@ class Pokemon {
       print('Error parsing evolutions: $e');
     }
 
+    List<PokemonMegaEvolution> megaEvolutionsList = [];
+    try {
+      final speciesData = json['pokemon_v2_pokemonspecy'];
+      if (speciesData != null &&
+          speciesData['pokemon_v2_evolutionchain'] != null &&
+          speciesData['pokemon_v2_evolutionchain']['pokemon_v2_pokemonspecies'] != null) {
+
+        final List<dynamic> species = speciesData['pokemon_v2_evolutionchain']['pokemon_v2_pokemonspecies'];
+
+        for (var speciesJson in species) {
+          if (speciesJson['pokemon_v2_pokemons'] != null) {
+            for (var pokemon in speciesJson['pokemon_v2_pokemons']) {
+              if (pokemon['pokemon_v2_pokemonforms'] != null) {
+                final forms = pokemon['pokemon_v2_pokemonforms'] as List;
+                final megaForms = forms
+                    .where((form) =>
+                form['form_name'] != null &&
+                    form['form_name'].toString().toLowerCase().contains('mega'))
+                    .map((form) {
+                  print('Found mega form: ${form['form_name']} with pokemon id: ${pokemon['id']}');
+                  return PokemonMegaEvolution.fromJson({
+                    ...form,
+                    'pokemon_id': pokemon['id'], // ID del Pokémon mega evolución
+                  });
+                })
+                    .toList();
+
+                megaEvolutionsList.addAll(megaForms);
+              }
+            }
+          }
+        }
+      }
+    } catch (e) {
+      print('Error parsing mega evolutions: $e');
+    }
+
+
+
 
 
     return Pokemon(
@@ -99,6 +141,7 @@ class Pokemon {
           .toList() ?? [],
       typeRelations: PokemonTypeRelations.fromTypes(typesForRelations),
       genus: json['pokemon_v2_pokemonspecy']['pokemon_v2_pokemonspeciesnames'][0]['genus'],
+      megaEvolutions: megaEvolutionsList,
     );
 
   }
