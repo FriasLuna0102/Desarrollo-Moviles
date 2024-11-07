@@ -57,9 +57,18 @@ Future<Pokemon> fetchPokemonDetails(int id) async {
             id
             name
             order
+            pokemon_v2_pokemons {
+              id
+              name
+              pokemon_v2_pokemonforms {
+                  id
+                  form_name
+                  name
+                }
+            }
           }
         }
-          pokemon_v2_pokemonspeciesnames(where: {language_id: {_eq: 9}}) {
+        pokemon_v2_pokemonspeciesnames(where: {language_id: {_eq: 9}}) {
           genus
         }
       }

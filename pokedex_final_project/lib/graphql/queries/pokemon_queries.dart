@@ -1,7 +1,7 @@
 const String queryPokemon = """
   query {
   pokemon_v2_pokemon(limit: 10) {
-     id
+      id
       name
       height
       weight
@@ -50,6 +50,15 @@ const String queryPokemon = """
             id
             name
             order
+            pokemon_v2_pokemons {
+              id
+              name
+              pokemon_v2_pokemonforms {
+                  id
+                  form_name
+                  name
+                }
+            }
           }
         }
         pokemon_v2_pokemonspeciesnames(where: {language_id: {_eq: 9}}) {
