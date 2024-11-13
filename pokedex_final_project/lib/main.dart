@@ -1,25 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
-import 'features/screens/pokemon_list.dart';
 import 'graphql/client.dart';
+import 'features/screens/home_page.dart';
 
 void main() {
-  final ValueNotifier<GraphQLClient> client = setupGraphQLClient();
-  runApp(MyApp(client: client));
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  final ValueNotifier<GraphQLClient> client;
-
-  const MyApp({super.key, required this.client});
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return GraphQLProvider(
-      client: client,
-      child: const MaterialApp(
-        title: 'PokeAPI GraphQL',
-        home: PokemonList(),
+      client: setupGraphQLClient(),
+
+      child: MaterialApp(
+        debugShowCheckedModeBanner: false,
+        title: "Pokedex Flutter",
+        theme: ThemeData(
+            primarySwatch: Colors.red
+        ),
+
+        home: const HomePage(),
       ),
     );
   }
