@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:pokedex_final_project/features/screens/home_page.dart';
 
 import '../../../features/screens/pokemon_detail.dart';
-import '../../../features/screens/pokemon_list.dart';
 import '../../models/pokemon.dart';
 
 class PageTransitions {
@@ -54,7 +54,7 @@ extension NavigationExtensions on BuildContext {
     Navigator.pushReplacement(
       this,
       PageTransitions.fadeAndSlide(
-        page: const PokemonList(),
+        page: const HomePage(),
       ),
     );
   }
