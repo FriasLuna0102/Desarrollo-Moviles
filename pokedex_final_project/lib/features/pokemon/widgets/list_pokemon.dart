@@ -1,7 +1,9 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
+import '../../../graphql/queries/pokemon_detail_by_id.dart';
 import '../../../graphql/queries/pokemon_list_query.dart';
+import '../../screens/pokemon_detail.dart';
 
 class ListPokemon extends StatelessWidget {
   const ListPokemon({super.key});
@@ -83,8 +85,15 @@ class ListPokemon extends StatelessWidget {
                     child: InkWell(
                       borderRadius: BorderRadius.circular(16.0),
                       enableFeedback: true,
-                      onTap: () {
+                      onTap: () async {
+                        final detailedPokemon = await fetchPokemonDetails(number);
                         // Navegación al detalle del Pokémon
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PokemonDetailScreen(pokemon: detailedPokemon),
+                          ),
+                        );
                       },
                       child: Container(
                         decoration: BoxDecoration(
