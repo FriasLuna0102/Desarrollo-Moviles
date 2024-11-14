@@ -22,8 +22,9 @@ Uso de la API GraphQL:
 
 En esta sección se explicará el uso de la API con graphql en el proyecto, desde como funciona a cómo se realiza.  Esta documentación cubre la implementación de GraphQL que se conecta con el endpoint GraphQL Beta de PokéAPI. La aplicación utiliza el paquete graphql_flutter para gestionar las operaciones GraphQL.
   
-Configuración del Cliente GraphQL
-La aplicación inicializa un cliente GraphQL en client.dart:
+## Configuración del Cliente GraphQL
+
+La aplicación inicializa un cliente GraphQL en client.dart.
 
 Utiliza HttpLink para conectarse al endpoint GraphQL de PokéAPI. Implementa caché en memoria con GraphQLCache para lograr mayor velocidad. Devuelve un cliente envuelto en ValueNotifier para actualizaciones reactivas.
 
