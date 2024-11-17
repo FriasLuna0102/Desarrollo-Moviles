@@ -60,11 +60,16 @@ Future<Pokemon> fetchPokemonDetails(int id) async {
             pokemon_v2_pokemons {
               id
               name
+              pokemon_v2_pokemontypes {
+                pokemon_v2_type {
+                  name
+                }
+              }
               pokemon_v2_pokemonforms {
                   id
                   form_name
                   name
-                }
+              }
             }
           }
         }

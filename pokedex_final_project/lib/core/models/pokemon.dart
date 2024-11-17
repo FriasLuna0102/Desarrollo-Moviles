@@ -70,10 +70,18 @@ class Pokemon {
         final List<dynamic> species =
         speciesData['pokemon_v2_evolutionchain']['pokemon_v2_pokemonspecies'];
 
-        evolutionsList = species.map((speciesJson) => PokemonEvolution(
-          id: speciesJson['id'],
-          name: speciesJson['name'],
-        )).toList();
+        evolutionsList = species.map((speciesJson) {
+          // Obtener los tipos de cada evolución
+          final pokemonTypes = (speciesJson['pokemon_v2_pokemons']?[0]?['pokemon_v2_pokemontypes'] as List?)
+              ?.map((type) => PokemonType.fromJson(type))
+              .toList() ?? [];
+
+          return PokemonEvolution(
+            id: speciesJson['id'],
+            name: speciesJson['name'],
+            types: pokemonTypes,
+          );
+        }).toList();
       }
     } catch (e) {
       print('Error parsing evolutions: $e');

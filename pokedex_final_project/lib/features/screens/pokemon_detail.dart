@@ -10,6 +10,9 @@ import '../pokemon/widgets/pokemon_moves_widget.dart';
 import '../pokemon/widgets/pokemon_stat_bar.dart';
 import '../pokemon/widgets/pokemon_type_chip.dart';
 import '../pokemon/widgets/pokemon_type_relations_widget.dart';
+import 'dart:math' show pi;
+
+import 'home_page.dart';
 
 
 class PokemonDetailScreen extends StatefulWidget {
@@ -21,8 +24,38 @@ class PokemonDetailScreen extends StatefulWidget {
   State<PokemonDetailScreen> createState() => _PokemonDetailScreenState();
 }
 
-class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
+class _PokemonDetailScreenState extends State<PokemonDetailScreen> with TickerProviderStateMixin {
+
   bool isFavorite = false;
+  double _rotationValue = 0.0;
+  double _lastRotation = 0.0;
+  bool _isDragging = false;
+  late AnimationController _autoRotationController;
+
+  @override
+  void initState() {
+    super.initState();
+    _autoRotationController = AnimationController(
+      duration: const Duration(milliseconds: 100000),
+      vsync: this,
+    );
+
+    _autoRotationController.addListener(() {
+      setState(() {
+        _rotationValue = _lastRotation + (2 * pi * CurvedAnimation(
+          parent: _autoRotationController,
+          curve: Curves.easeInOutQuad,
+        ).value);
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _autoRotationController.dispose();
+    super.dispose();
+  }
+
 
   Widget _buildMegaEvolutionsSection() {
     if (widget.pokemon.megaEvolutions.isEmpty) {
@@ -89,11 +122,56 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
           _buildPokemonHeader(),
           const SizedBox(height: 16),
           if (widget.pokemon.imageUrl != null)
-            Image.network(
-              widget.pokemon.imageUrl!,
-              width: 200,
-              height: 200,
-              fit: BoxFit.contain,
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    _lastRotation = _rotationValue;
+                    _autoRotationController.forward(from: 0).then((_) {
+                      _lastRotation = _rotationValue;
+                    });
+                  },
+                  onPanStart: (details) {
+                    _autoRotationController.stop();
+                    setState(() {
+                      _isDragging = true;
+                    });
+                  },
+                  onPanUpdate: (details) {
+                    setState(() {
+                      _rotationValue += details.delta.dx * 0.01;
+                    });
+                  },
+                  onPanEnd: (details) {
+                    setState(() {
+                      _isDragging = false;
+                      _lastRotation = _rotationValue;
+                    });
+                  },
+                  child: Transform(
+                    alignment: Alignment.center,
+                    transform: Matrix4.identity()
+                      ..setEntry(3, 2, 0.0008)
+                      ..rotateY(_rotationValue),
+                    child: Image.network(
+                      widget.pokemon.imageUrl!,
+                      width: 200,
+                      height: 200,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        return const Center(
+                          child: Icon(
+                            Icons.catching_pokemon,
+                            size: 100,
+                            color: Colors.grey,
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ],
             ),
           _buildPokemonName(),
           const SizedBox(height: 30),
@@ -116,8 +194,24 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
             color: Colors.white,
             size: 28,
           ),
-          onPressed: () => context.goToPokemonList(),
-
+          // onPressed: () => context.goToPokemonList(),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+        // Botón de Home
+        IconButton(
+          icon: const Icon(
+            Icons.home,
+            color: Colors.white,
+            size: 28,
+          ),
+          onPressed: () {
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (context) => const HomePage()),
+                  (Route<dynamic> route) => false,
+            );
+          },
         ),
         // ID del Pokémon
         Expanded(
@@ -261,7 +355,10 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
       return const SizedBox.shrink();
     }
 
-    // Obtenemos los colores de los tipos del Pokémon
+    // Detectar si es familia de Eevee (incluyendo Eevee y sus evoluciones)
+    bool isEeveeFamily = widget.pokemon.evolutions.any((e) => e.id == 133) ||
+        widget.pokemon.id == 133;
+
     List<Color> gradientColors = widget.pokemon.types.length > 1
         ? [
       PokemonColors.getTypeColor(widget.pokemon.types[0].name),
@@ -287,19 +384,21 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Padding(
-              padding: EdgeInsets.only(left: 16, bottom: 0),
-              child: Center(
-                child: Text(
-                  'Evoluciones',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
+            padding: EdgeInsets.only(left: 16, bottom: 16),
+            child: Center(
+              child: Text(
+                'Evoluciones',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
-              )
+              ),
+            ),
           ),
-          SizedBox(
+          isEeveeFamily
+              ? _buildEeveeEvolutionsFamily()
+              : SizedBox(
             height: 200,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -310,6 +409,65 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
       ),
     );
   }
+
+  Widget _buildEeveeEvolutionsFamily() {
+    // Encontrar Eevee en las evoluciones
+    final eevee = widget.pokemon.evolutions.firstWhere(
+          (e) => e.id == 133,
+      orElse: () => widget.pokemon.evolutions.first,
+    );
+
+    // Obtener todas las evoluciones excepto Eevee
+    final evolutions = widget.pokemon.evolutions
+        .where((e) => e.id != 133)
+        .toList();
+
+    return Column(
+      children: [
+        // Eevee en el centro
+        SizedBox(
+          height: 180,
+          child: _buildEvolutionItem(eevee, 0),
+        ),
+        const SizedBox(height: 16),
+        // Flechas indicando múltiples evoluciones
+        const Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.arrow_downward, color: Colors.white),
+            SizedBox(width: 8),
+            Text(
+              "Múltiples evoluciones",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(width: 8),
+            Icon(Icons.arrow_downward, color: Colors.white),
+          ],
+        ),
+        const SizedBox(height: 16),
+        // Grid de evoluciones
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            childAspectRatio: 0.75,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 24,
+          ),
+          itemCount: evolutions.length,
+          itemBuilder: (context, index) {
+            return _buildEvolutionItem(evolutions[index], index + 1);
+          },
+        ),
+      ],
+    );
+  }
+
 
   List<Widget> _buildEvolutionChain() {
     List<Widget> evolutionWidgets = [];
@@ -435,7 +593,7 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
           const SizedBox(height: 4),
           Column(
             mainAxisSize: MainAxisSize.min,
-            children: widget.pokemon.types.map((type) {
+            children: evolution.types.map((type) {
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 2),
                 child: Container(
