@@ -261,7 +261,10 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
       return const SizedBox.shrink();
     }
 
-    // Obtenemos los colores de los tipos del Pokémon
+    // Detectar si es familia de Eevee (incluyendo Eevee y sus evoluciones)
+    bool isEeveeFamily = widget.pokemon.evolutions.any((e) => e.id == 133) ||
+        widget.pokemon.id == 133;
+
     List<Color> gradientColors = widget.pokemon.types.length > 1
         ? [
       PokemonColors.getTypeColor(widget.pokemon.types[0].name),
@@ -287,19 +290,21 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Padding(
-              padding: EdgeInsets.only(left: 16, bottom: 0),
-              child: Center(
-                child: Text(
-                  'Evoluciones',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
+            padding: EdgeInsets.only(left: 16, bottom: 16),
+            child: Center(
+              child: Text(
+                'Evoluciones',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
-              )
+              ),
+            ),
           ),
-          SizedBox(
+          isEeveeFamily
+              ? _buildEeveeEvolutionsFamily()
+              : SizedBox(
             height: 200,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
@@ -310,6 +315,65 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
       ),
     );
   }
+
+  Widget _buildEeveeEvolutionsFamily() {
+    // Encontrar Eevee en las evoluciones
+    final eevee = widget.pokemon.evolutions.firstWhere(
+          (e) => e.id == 133,
+      orElse: () => widget.pokemon.evolutions.first,
+    );
+
+    // Obtener todas las evoluciones excepto Eevee
+    final evolutions = widget.pokemon.evolutions
+        .where((e) => e.id != 133)
+        .toList();
+
+    return Column(
+      children: [
+        // Eevee en el centro
+        SizedBox(
+          height: 180,
+          child: _buildEvolutionItem(eevee, 0),
+        ),
+        const SizedBox(height: 16),
+        // Flechas indicando múltiples evoluciones
+        const Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.arrow_downward, color: Colors.white),
+            SizedBox(width: 8),
+            Text(
+              "Múltiples evoluciones",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(width: 8),
+            Icon(Icons.arrow_downward, color: Colors.white),
+          ],
+        ),
+        const SizedBox(height: 16),
+        // Grid de evoluciones
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            childAspectRatio: 0.75,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 24,
+          ),
+          itemCount: evolutions.length,
+          itemBuilder: (context, index) {
+            return _buildEvolutionItem(evolutions[index], index + 1);
+          },
+        ),
+      ],
+    );
+  }
+
 
   List<Widget> _buildEvolutionChain() {
     List<Widget> evolutionWidgets = [];
@@ -435,7 +499,7 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> {
           const SizedBox(height: 4),
           Column(
             mainAxisSize: MainAxisSize.min,
-            children: widget.pokemon.types.map((type) {
+            children: evolution.types.map((type) {
               return Padding(
                 padding: const EdgeInsets.symmetric(vertical: 2),
                 child: Container(
