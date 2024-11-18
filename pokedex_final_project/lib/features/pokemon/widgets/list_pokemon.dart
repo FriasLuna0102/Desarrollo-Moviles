@@ -9,8 +9,9 @@ import '../../screens/pokemon_detail.dart';
 class ListPokemon extends StatelessWidget {
   final Map<String, Set<String>> activeFilters;
   final SortOption currentSort;
+  final String searchQuery;
 
-  const ListPokemon({super.key, required this.activeFilters, required this.currentSort});
+  const ListPokemon({super.key, required this.activeFilters, required this.currentSort, required this.searchQuery});
 
   String _formatPokemonNumber(int number) {
     return '#${number.toString().padLeft(3, '0')}';
@@ -41,8 +42,6 @@ class ListPokemon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final typesList = _getTypesList(activeFilters['types']);
-
     return Query(
       options: QueryOptions(
         document: gql(queryPokemonList),
@@ -52,7 +51,11 @@ class ListPokemon extends StatelessWidget {
           'generations': _getGenerationList(activeFilters['generations']),
           'orderBy': currentSort.field == SortField.id
               ? [{"id": currentSort.order == SortOrder.asc ? "asc" : "desc"}]
-              : [{"name": currentSort.order == SortOrder.asc ? "asc" : "desc"}],        }
+              : [{"name": currentSort.order == SortOrder.asc ? "asc" : "desc"}],
+          'searchTerm': searchQuery.isEmpty ? '%%' : '%${searchQuery.toLowerCase()}%',
+
+        }
+
       ),
       builder: (result, {fetchMore, refetch}) {
         if (result.isLoading) {

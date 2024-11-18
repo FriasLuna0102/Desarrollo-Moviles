@@ -3,6 +3,7 @@ query listPokemons(
  \$types: [String!], 
  \$generations: [Int!],
  \$orderBy: [pokemon_v2_pokemon_order_by!]
+  \$searchTerm: String
 ) {
  pokemon_v2_pokemon(
    limit: 80,
@@ -23,6 +24,11 @@ query listPokemons(
            generation_id: {
              _in: \$generations
            }
+         }
+       },
+       {
+         name: {
+           _ilike: \$searchTerm
          }
        }
      ]

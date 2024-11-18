@@ -15,6 +15,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  String _searchQuery = '';
+
   Map<String, Set<String>> activeFilters = {
     'generations': {},
     'types': {},
@@ -26,6 +28,12 @@ class _HomePageState extends State<HomePage> {
     label: 'Lowest Number (First)',
   );
 
+  void _onSearchChanged(String value) {
+    setState(() {
+      _searchQuery = value.trim();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -34,10 +42,9 @@ class _HomePageState extends State<HomePage> {
           SliverAppBar(
             title: const Text("Pokedex",
               style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-                fontSize: 27
-
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  fontSize: 27
               ),
             ),
             backgroundColor: Colors.red,
@@ -45,33 +52,35 @@ class _HomePageState extends State<HomePage> {
             pinned: true,
             snap: true,
             centerTitle: false,
-
             bottom: AppBar(
               backgroundColor: Colors.red,
               title: Padding(
-                padding: EdgeInsets.all(8.0),
+                padding: const EdgeInsets.all(8.0),
                 child: Container(
                   height: 40,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(15),
-                    color: Colors.white
+                      borderRadius: BorderRadius.circular(15),
+                      color: Colors.white
                   ),
-                  child: const TextField(
-                    decoration: InputDecoration(
-                      hintText: "Search",
-                      hintStyle: TextStyle(color: Colors.grey),
-                      suffixIcon: Icon(Icons.search),
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 10)
+                  child: TextField(
+                    onChanged: _onSearchChanged,
+                    decoration: const InputDecoration(
+                        hintText: "Search",
+                        hintStyle: TextStyle(color: Colors.grey),
+                        suffixIcon: Icon(Icons.search),
+                        border: InputBorder.none,
+                        contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 10)
                     ),
                   ),
                 ),
               ),
             ),
-
           ),
-
-          ListPokemon(activeFilters: activeFilters, currentSort: currentSort,),
+          ListPokemon(
+            activeFilters: activeFilters,
+            currentSort: currentSort,
+            searchQuery: _searchQuery,
+          ),
         ],
       ),
       floatingActionButton: ExpandableFab(
@@ -110,12 +119,11 @@ class _HomePageState extends State<HomePage> {
                     );
                   },
                 )
-            },
+              },
               icon: const Icon(Icons.filter_list),
             ),
           ]
       ),
-
     );
   }
 }
