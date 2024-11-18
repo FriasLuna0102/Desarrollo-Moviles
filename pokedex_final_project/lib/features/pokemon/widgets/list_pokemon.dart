@@ -133,7 +133,8 @@ class ListPokemon extends StatelessWidget {
                               const SizedBox(height: 8),
                               Expanded(
                                 child: Center(
-                                  child: CachedNetworkImage(
+                                  child: spriteUrl != null
+                                      ? CachedNetworkImage(
                                     imageUrl: spriteUrl,
                                     fit: BoxFit.contain,
                                     placeholder: (context, url) => const Center(
@@ -143,8 +144,12 @@ class ListPokemon extends StatelessWidget {
                                       Icons.broken_image,
                                       size: 96,
                                     ),
-                                  ),
-                                ),
+                                  )
+                                      : const Icon(  // Este es el caso cuando spriteUrl es null
+                                    Icons.broken_image,
+                                    size: 96,
+                                    color: Colors.white,  // Para que sea visible sobre el fondo de colores
+                                  ),                                ),
                               ),
                               const SizedBox(height: 8),
                               Center(
