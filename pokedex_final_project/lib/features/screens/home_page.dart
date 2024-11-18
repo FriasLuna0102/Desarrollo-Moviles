@@ -1,5 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:pokedex_final_project/features/pokemon/widgets/popup_options/sorting_section.dart';
+
 import '../pokemon/widgets/list_pokemon.dart';
+import '../pokemon/widgets/popup_options/action_button_expandable.dart';
+import '../pokemon/widgets/popup_options/expandable_fab.dart';
+import '../pokemon/widgets/popup_options/popup_options_for_list.dart';
+import '../pokemon/widgets/popup_options/sorting_dialog.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -9,6 +15,17 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  Map<String, Set<String>> activeFilters = {
+    'generations': {},
+    'types': {},
+  };
+
+  SortOption currentSort = const SortOption(
+    field: SortField.id,
+    order: SortOrder.asc,
+    label: 'Lowest Number (First)',
+  );
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -29,17 +46,6 @@ class _HomePageState extends State<HomePage> {
             snap: true,
             centerTitle: false,
 
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.filter_list),
-                color: Colors.white,
-                tooltip: "Filter",
-                onPressed: () {
-
-                },
-              )
-            ],
-
             bottom: AppBar(
               backgroundColor: Colors.red,
               title: Padding(
@@ -50,7 +56,7 @@ class _HomePageState extends State<HomePage> {
                     borderRadius: BorderRadius.circular(15),
                     color: Colors.white
                   ),
-                  child: TextField(
+                  child: const TextField(
                     decoration: InputDecoration(
                       hintText: "Search",
                       hintStyle: TextStyle(color: Colors.grey),
@@ -65,8 +71,49 @@ class _HomePageState extends State<HomePage> {
 
           ),
 
-          const ListPokemon(),
+          ListPokemon(activeFilters: activeFilters, currentSort: currentSort,),
         ],
+      ),
+      floatingActionButton: ExpandableFab(
+          distance: 60,
+          children: [
+            ActionButton(
+              onPressed: () => {
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return SortingDialog(
+                      currentSort: currentSort,
+                      onSortChanged: (sort) {
+                        setState(() {
+                          currentSort = sort;
+                        });
+                      },
+                    );
+                  },
+                )
+              },
+              icon: const Icon(Icons.sort),
+            ),
+            ActionButton(
+              onPressed: () => {
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return PopupOptionsForList(
+                      currentFilters: activeFilters,
+                      onFiltersChanged: (filters) {
+                        setState(() {
+                          activeFilters = filters;
+                        });
+                      },
+                    );
+                  },
+                )
+            },
+              icon: const Icon(Icons.filter_list),
+            ),
+          ]
       ),
 
     );
