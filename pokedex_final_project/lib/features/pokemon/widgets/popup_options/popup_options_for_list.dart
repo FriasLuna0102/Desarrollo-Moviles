@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'filter_section.dart';
 
 class PopupOptionsForList extends StatefulWidget {

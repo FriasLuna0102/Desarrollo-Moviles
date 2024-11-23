@@ -2,11 +2,19 @@ const String queryPokemonList = """
 query listPokemons(
  \$types: [String!], 
  \$generations: [Int!],
- \$orderBy: [pokemon_v2_pokemon_order_by!]
-  \$searchTerm: String
+ \$orderBy: [pokemon_v2_pokemon_order_by!],
+ \$searchName: String,
+ \$offset: Int,
+ \$limit: Int
 ) {
+  pokemon_v2_pokemon_aggregate {
+   aggregate {
+     count
+   }
+ }
  pokemon_v2_pokemon(
-   limit: 80,
+   offset: \$offset,
+   limit: \$limit,
    order_by: \$orderBy,
    where: {
      _and: [
@@ -27,9 +35,9 @@ query listPokemons(
          }
        },
        {
-         name: {
-           _ilike: \$searchTerm
-         }
+          name: {
+            _ilike: \$searchName
+          }
        }
      ]
    }

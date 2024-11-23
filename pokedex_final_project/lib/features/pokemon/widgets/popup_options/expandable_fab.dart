@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import 'expanding_action_button.dart';
 
 @immutable

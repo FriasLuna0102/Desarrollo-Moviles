@@ -4,6 +4,7 @@ import 'dart:math' as math;
 @immutable
 class ExpandingActionButton extends StatelessWidget {
   const ExpandingActionButton({
+    super.key,
     required this.directionInDegrees,
     required this.maxDistance,
     required this.progress,
