@@ -29,6 +29,7 @@ class PokemonDetailScreen extends StatefulWidget {
 class _PokemonDetailScreenState extends State<PokemonDetailScreen> with TickerProviderStateMixin {
 
   bool isFavorite = false;
+  bool isLoading = false;
   double _rotationValue = 0.0;
   double _lastRotation = 0.0;
   bool _isDragging = false;
@@ -105,6 +106,49 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> with TickerPr
     }
   }
 
+  Future<void> _navigateToPokemon(int id) async {
+    if (isLoading) return;
+
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      final pokemon = await fetchPokemonDetails(id);
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) => PokemonDetailScreen(pokemon: pokemon),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              const begin = Offset(1.0, 0.0);
+              const end = Offset.zero;
+              const curve = Curves.easeInOut;
+              var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+              var offsetAnimation = animation.drive(tween);
+              return SlideTransition(position: offsetAnimation, child: child);
+            },
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al cargar el Pokémon: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
+  }
+
 
   Widget _buildMegaEvolutionsSection() {
     if (widget.pokemon.megaEvolutions.isEmpty) {
@@ -128,24 +172,92 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> with TickerPr
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            const SizedBox(height: 30),
-            _buildHeaderCard(),
-            const SizedBox(height: 16),
-            _buildStatsSection(),
-            const SizedBox(height: 16),
-            _buildTypeRelationsSection(),
-            const SizedBox(height: 16),
-            _buildAbilitiesSection(),
-            const SizedBox(height: 16),
-            _buildEvolutionSection(),
-            const SizedBox(height: 16),
-            _buildMegaEvolutionsSection(),
-            const SizedBox(height: 16),
-            _buildMovesSection(),
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            child: Column(
+              children: [
+                const SizedBox(height: 30),
+                _buildHeaderCard(),
+                const SizedBox(height: 16),
+                _buildStatsSection(),
+                const SizedBox(height: 16),
+                _buildTypeRelationsSection(),
+                const SizedBox(height: 16),
+                _buildAbilitiesSection(),
+                const SizedBox(height: 16),
+                _buildEvolutionSection(),
+                const SizedBox(height: 16),
+                _buildMegaEvolutionsSection(),
+                const SizedBox(height: 16),
+                _buildMovesSection(),
+              ],
+            ),
+          ),
+          // Botones de navegación laterales
+          if (!isLoading) ...[
+            // Botón Anterior
+            Positioned(
+              left: 0,
+              top: MediaQuery.of(context).size.height / 2 - 30,
+              child: widget.pokemon.id > 1 ? _buildNavigationButton(
+                icon: Icons.arrow_back_ios,
+                onPressed: () => _navigateToPokemon(widget.pokemon.id - 1),
+              ) : const SizedBox(),
+            ),
+            // Botón Siguiente
+            Positioned(
+              right: 0,
+              top: MediaQuery.of(context).size.height / 2 - 30,
+              child: _buildNavigationButton(
+                icon: Icons.arrow_forward_ios,
+                onPressed: () => _navigateToPokemon(widget.pokemon.id + 1),
+              ),
+            ),
           ],
+          // Indicador de carga
+          if (isLoading)
+            Container(
+              color: Colors.black.withOpacity(0.3),
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNavigationButton({
+    required IconData icon,
+    required VoidCallback onPressed,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.9),
+        borderRadius: BorderRadius.circular(30),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            spreadRadius: 1,
+            blurRadius: 5,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(30),
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            child: Icon(
+              icon,
+              color: Colors.black87,
+              size: 24,
+            ),
+          ),
         ),
       ),
     );
