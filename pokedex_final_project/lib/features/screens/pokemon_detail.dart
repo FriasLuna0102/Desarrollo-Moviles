@@ -275,11 +275,9 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> with TickerPr
           onPressed: () {
             showModalBottomSheet(
               context: context,
-              backgroundColor: Colors.white,
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-              ),
-              builder: (context) => PokemonCardShare(pokemon: widget.pokemon),
+              isScrollControlled: true,
+              backgroundColor: Colors.transparent,
+              builder: (context) => PokemonCardShareScreen(pokemon: widget.pokemon),
             );
           },
         ),

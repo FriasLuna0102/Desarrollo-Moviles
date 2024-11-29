@@ -1,310 +1,238 @@
 import 'dart:io';
-import 'dart:typed_data';
+import 'dart:typed_data';  // Este import es para ByteData y Uint8List
 import 'dart:ui' as ui;
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:http/http.dart' as http;
+
 import '../../../core/models/pokemon.dart';
+import '../../../core/models/pokemon_tcg_models.dart';
+import '../../../core/services/pokemon_tcg_service.dart';
 import '../../../core/theme/pokemon_colors.dart';
+import 'custom_pokemon_card.dart';
 
-class PokemonCardShare extends StatelessWidget {
+class PokemonCardShareScreen extends StatefulWidget {
   final Pokemon pokemon;
-  final GlobalKey _cardKey = GlobalKey();
 
-  PokemonCardShare({Key? key, required this.pokemon}) : super(key: key);
+  const PokemonCardShareScreen({Key? key, required this.pokemon}) : super(key: key);
 
-  Future<void> _capturePng() async {
+  @override
+  State<PokemonCardShareScreen> createState() => _PokemonCardShareScreenState();
+}
+
+class _PokemonCardShareScreenState extends State<PokemonCardShareScreen> with SingleTickerProviderStateMixin {
+  List<PokemonCard> cards = [];
+  bool isLoading = true;
+  bool showCustomCard = false;
+  late TabController _tabController;
+  final GlobalKey customCardKey = GlobalKey();
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+    _loadCards();
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _loadCards() async {
     try {
-      RenderRepaintBoundary boundary = _cardKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+      final loadedCards = await PokemonTCGService.searchCardsByPokemonName(
+        widget.pokemon.name,
+      );
+      setState(() {
+        cards = loadedCards;
+        isLoading = false;
+        // Si no hay cartas, automáticamente mostrar la tarjeta personalizada
+        if (cards.isEmpty) {
+          _tabController.animateTo(1);
+        }
+      });
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+        _tabController.animateTo(1);
+      });
+    }
+  }
+
+  Future<void> _shareCard(PokemonCard card) async {
+    try {
+      final response = await http.get(Uri.parse(card.imageUrl));
+      final bytes = response.bodyBytes;
+      final temp = await getTemporaryDirectory();
+      final path = '${temp.path}/pokemon_card.png';
+      File(path).writeAsBytesSync(bytes);
+
+      await Share.shareXFiles(
+        [XFile(path)],
+        text: '¡Mira esta carta de ${card.name}!',
+      );
+    } catch (e) {
+      print('Error sharing card: $e');
+    }
+  }
+
+  Future<void> _shareCustomCard() async {
+    try {
+      RenderRepaintBoundary boundary = customCardKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
       ui.Image image = await boundary.toImage(pixelRatio: 3.0);
       ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
 
       if (byteData != null) {
         Uint8List pngBytes = byteData.buffer.asUint8List();
-        final tempDir = await getTemporaryDirectory();
-        final file = await File('${tempDir.path}/pokemon_card.png').create();
-        await file.writeAsBytes(pngBytes);
+        final temp = await getTemporaryDirectory();
+        final file = await File('${temp.path}/pokemon_card.png').create();
+        await file.writeAsBytes(pngBytes);  // Eliminar el cast a List<int>
 
         await Share.shareXFiles(
           [XFile(file.path)],
-          text: '¡Mira este Pokémon! ${pokemon.name.toUpperCase()}',
+          text: '¡Mira este Pokémon! ${widget.pokemon.name.toUpperCase()}',
         );
       }
     } catch (e) {
       print('Error al capturar la imagen: $e');
     }
   }
-
   @override
   Widget build(BuildContext context) {
-    final primaryType = pokemon.types.first.name;
-    final backgroundColor = PokemonColors.getTypeColor(primaryType);
-
     return DraggableScrollableSheet(
-      initialChildSize: 0.85,
+      initialChildSize: 0.9,
       minChildSize: 0.5,
       maxChildSize: 0.95,
       builder: (context, scrollController) {
         return Container(
           decoration: BoxDecoration(
-            color: Colors.grey[50],
+            color: Colors.white,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
           ),
-          child: SingleChildScrollView(
-            controller: scrollController,
+          child: Column(
+            children: [
+              // Drag Handle
+              Container(
+                margin: const EdgeInsets.symmetric(vertical: 12),
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+
+              // Title and Tabs
+              TabBar(
+                controller: _tabController,
+                tabs: const [
+                  Tab(text: 'Cartas TCG'),
+                  Tab(text: 'Carta Personalizada'),
+                ],
+                labelColor: Colors.black,
+                indicatorColor: PokemonColors.getTypeColor(widget.pokemon.types.first.name),
+              ),
+
+              // Content
+              Expanded(
+                child: TabBarView(
+                  controller: _tabController,
+                  children: [
+                    // TCG Cards Tab
+                    _buildTCGCardsView(scrollController),
+
+                    // Custom Card Tab
+                    _buildCustomCardView(scrollController),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildTCGCardsView(ScrollController scrollController) {
+    if (isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (cards.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('No se encontraron cartas TCG'),
+            const SizedBox(height: 16),
+            TextButton(
+              onPressed: () => _tabController.animateTo(1),
+              child: const Text('Ver carta personalizada'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return GridView.builder(
+      controller: scrollController,
+      padding: const EdgeInsets.all(16),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        childAspectRatio: 0.7,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
+      ),
+      itemCount: cards.length,
+      itemBuilder: (context, index) {
+        final card = cards[index];
+        return GestureDetector(
+          onTap: () => _shareCard(card),
+          child: Card(
+            elevation: 4,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
             child: Column(
-              mainAxisSize: MainAxisSize.min,
               children: [
-                // Drag Handle
-                Container(
-                  margin: const EdgeInsets.symmetric(vertical: 12),
-                  width: 40,
-                  height: 4,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    borderRadius: BorderRadius.circular(2),
-                  ),
-                ),
-
-                // Title
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8.0),
-                  child: Text(
-                    'Compartir carta de ${pokemon.name.toUpperCase()}',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
+                Expanded(
+                  child: ClipRRect(
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(16),
+                    ),
+                    child: Image.network(
+                      card.imageUrl,
+                      fit: BoxFit.cover,
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return Center(
+                          child: CircularProgressIndicator(
+                            value: loadingProgress.expectedTotalBytes != null
+                                ? loadingProgress.cumulativeBytesLoaded /
+                                loadingProgress.expectedTotalBytes!
+                                : null,
+                          ),
+                        );
+                      },
                     ),
                   ),
                 ),
-
-                // Card Preview
                 Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                  child: RepaintBoundary(
-                    key: _cardKey,
-                    child: Container(
-                      width: 300,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
-                            blurRadius: 8,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // Header
-                          Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: backgroundColor,
-                              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  pokemon.name.toUpperCase(),
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                Text(
-                                  'HP ${pokemon.stats.firstWhere((stat) => stat.name == 'hp').baseStat}',
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-
-                          // Imagen del Pokémon
-                          Container(
-                            height: 200,
-                            width: double.infinity,
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                                colors: [
-                                  backgroundColor.withOpacity(0.2),
-                                  backgroundColor.withOpacity(0.1),
-                                ],
-                              ),
-                            ),
-                            child: pokemon.imageUrl != null
-                                ? Image.network(
-                              pokemon.imageUrl!,
-                              fit: BoxFit.contain,
-                            )
-                                : const Icon(
-                              Icons.catching_pokemon,
-                              size: 100,
-                              color: Colors.grey,
-                            ),
-                          ),
-
-                          // Stats y Movimientos
-                          Container(
-                            padding: const EdgeInsets.all(16),
-                            child: Column(
-                              children: [
-                                if (pokemon.moves.isNotEmpty)
-                                  Container(
-                                    padding: const EdgeInsets.all(8),
-                                    decoration: BoxDecoration(
-                                      border: Border.all(color: Colors.grey.shade300),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          pokemon.moves.first.name.toUpperCase(),
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 16,
-                                          ),
-                                        ),
-                                        Text(
-                                          '${pokemon.moves.first.power ?? 0}',
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 16,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-
-                                const SizedBox(height: 16),
-
-                                // Tipos y Debilidades
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        const Text(
-                                          'TIPO',
-                                          style: TextStyle(
-                                            color: Colors.grey,
-                                            fontSize: 12,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Row(
-                                          children: pokemon.types
-                                              .map(
-                                                (type) => Container(
-                                              margin: const EdgeInsets.only(right: 4),
-                                              padding: const EdgeInsets.symmetric(
-                                                horizontal: 8,
-                                                vertical: 4,
-                                              ),
-                                              decoration: BoxDecoration(
-                                                color: PokemonColors.getTypeColor(type.name),
-                                                borderRadius: BorderRadius.circular(4),
-                                              ),
-                                              child: Text(
-                                                type.name.toUpperCase(),
-                                                style: const TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 12,
-                                                ),
-                                              ),
-                                            ),
-                                          )
-                                              .toList(),
-                                        ),
-                                      ],
-                                    ),
-                                    Column(
-                                      crossAxisAlignment: CrossAxisAlignment.end,
-                                      children: [
-                                        const Text(
-                                          'DEBILIDAD',
-                                          style: TextStyle(
-                                            color: Colors.grey,
-                                            fontSize: 12,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 4),
-                                        Row(
-                                          children: pokemon.typeRelations.weaknesses
-                                              .take(2)
-                                              .map(
-                                                (weakness) => Container(
-                                              margin: const EdgeInsets.only(left: 4),
-                                              padding: const EdgeInsets.symmetric(
-                                                horizontal: 8,
-                                                vertical: 4,
-                                              ),
-                                              decoration: BoxDecoration(
-                                                color: PokemonColors.getTypeColor(weakness.type),
-                                                borderRadius: BorderRadius.circular(4),
-                                              ),
-                                              child: Text(
-                                                weakness.type.toUpperCase(),
-                                                style: const TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 12,
-                                                ),
-                                              ),
-                                            ),
-                                          )
-                                              .toList(),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-
-                // Share Buttons
-                Padding(
-                  padding: const EdgeInsets.all(24.0),
+                  padding: const EdgeInsets.all(8.0),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      _buildShareButton(
-                        icon: Icons.share,
-                        label: 'Compartir',
-                        onTap: _capturePng,
-                        backgroundColor: backgroundColor,
-                      ),
-                      _buildShareButton(
-                        icon: Icons.close,
-                        label: 'Cerrar',
-                        onTap: () => Navigator.of(context).pop(),
-                        backgroundColor: Colors.grey,
-                      ),
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: const [
+                      Icon(Icons.share, size: 20),
+                      SizedBox(width: 4),
+                      Text('Compartir'),
                     ],
                   ),
                 ),
-
-                // Bottom padding to ensure everything is visible
-                const SizedBox(height: 20),
               ],
             ),
           ),
@@ -313,37 +241,29 @@ class PokemonCardShare extends StatelessWidget {
     );
   }
 
-  Widget _buildShareButton({
-    required IconData icon,
-    required String label,
-    required VoidCallback onTap,
-    required Color backgroundColor,
-  }) {
-    return InkWell(
-      onTap: onTap,
+  Widget _buildCustomCardView(ScrollController scrollController) {
+    return SingleChildScrollView(
+      controller: scrollController,
       child: Column(
-        mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: backgroundColor,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(
-              icon,
-              color: Colors.white,
-              size: 24,
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: CustomPokemonCard(
+              cardKey: customCardKey,  // Pasamos la key
+              pokemon: widget.pokemon,
             ),
           ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
+          const SizedBox(height: 20),
+          ElevatedButton.icon(
+            onPressed: _shareCustomCard,
+            icon: const Icon(Icons.share),
+            label: const Text('Compartir carta personalizada'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: PokemonColors.getTypeColor(widget.pokemon.types.first.name),
+              foregroundColor: Colors.white,
             ),
           ),
+          const SizedBox(height: 20),
         ],
       ),
     );
