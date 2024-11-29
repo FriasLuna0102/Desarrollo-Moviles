@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 import '../../../core/models/pokemon_stat.dart';
 
 class PokemonStatBar extends StatelessWidget {
@@ -14,11 +13,22 @@ class PokemonStatBar extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            stat.name.toUpperCase(),
-            style: const TextStyle(
-              fontWeight: FontWeight.w500,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                stat.name.toUpperCase(),
+                style: const TextStyle(
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              Text(
+                stat.baseStat.toString(),
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 4),
           LinearProgressIndicator(
@@ -27,6 +37,7 @@ class PokemonStatBar extends StatelessWidget {
             valueColor: AlwaysStoppedAnimation<Color>(
               stat.baseStat > 50 ? Colors.green : Colors.orange,
             ),
+            minHeight: 8,
           ),
         ],
       ),

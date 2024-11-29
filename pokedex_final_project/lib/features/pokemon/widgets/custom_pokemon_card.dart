@@ -20,7 +20,7 @@ class CustomPokemonCard extends StatelessWidget {
     final backgroundColor = PokemonColors.getTypeColor(primaryType);
 
     return RepaintBoundary(
-      key: cardKey,  // Usamos la key que recibimos
+      key: cardKey,
       child: Container(
         width: 300,
         decoration: BoxDecoration(

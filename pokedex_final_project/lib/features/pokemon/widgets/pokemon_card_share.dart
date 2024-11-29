@@ -91,7 +91,7 @@ class _PokemonCardShareScreenState extends State<PokemonCardShareScreen> with Si
         Uint8List pngBytes = byteData.buffer.asUint8List();
         final temp = await getTemporaryDirectory();
         final file = await File('${temp.path}/pokemon_card.png').create();
-        await file.writeAsBytes(pngBytes);  // Eliminar el cast a List<int>
+        await file.writeAsBytes(pngBytes);
 
         await Share.shareXFiles(
           [XFile(file.path)],
