@@ -5,6 +5,7 @@ import '../../core/models/pokemon.dart';
 import '../../core/models/pokemon_evolutions.dart';
 import '../../core/theme/pokemon_colors.dart';
 import '../../graphql/queries/pokemon_detail_by_id.dart';
+import '../pokemon/widgets/pokemon_card_share.dart';
 import '../pokemon/widgets/pokemon_mega_evolutions.dart';
 import '../pokemon/widgets/pokemon_metric_card.dart';
 import '../pokemon/widgets/pokemon_moves_widget.dart';
@@ -235,6 +236,24 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> with TickerPr
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
+
+        IconButton(
+          icon: const Icon(
+            Icons.share,
+            color: Colors.white,
+            size: 28,
+          ),
+          onPressed: () {
+            showModalBottomSheet(
+              context: context,
+              backgroundColor: Colors.white,
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              builder: (context) => PokemonCardShare(pokemon: widget.pokemon),
+            );
+          },
+        ),
         // Botón de retroceso
         IconButton(
           icon: const Icon(
