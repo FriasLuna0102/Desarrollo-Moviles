@@ -39,20 +39,18 @@ class _HomePageState extends State<HomePage> {
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
-            title: const Text("Pokedex",
+            title: const Text(
+              "Pokedex",
               style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-                fontSize: 27
-
-              ),
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  fontSize: 27),
             ),
             backgroundColor: Colors.red,
             floating: true,
             pinned: true,
             snap: true,
             centerTitle: false,
-
             bottom: AppBar(
               backgroundColor: Colors.red,
               title: Padding(
@@ -60,21 +58,21 @@ class _HomePageState extends State<HomePage> {
                 child: Container(
                   height: 40,
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(15),
-                    color: Colors.white
-                  ),
+                      borderRadius: BorderRadius.circular(15),
+                      color: Colors.white),
                   child: TextField(
                     decoration: InputDecoration(
                       hintText: "Search",
                       hintStyle: TextStyle(color: Colors.grey),
                       suffixIcon: Icon(Icons.search),
                       border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                      contentPadding:
+                          EdgeInsets.symmetric(vertical: 10, horizontal: 10),
                     ),
                     onChanged: (String value) {
                       setState(() {
                         value = value.trim();
-                        if (isNumeric(value)){
+                        if (isNumeric(value)) {
                           _searchNumber = int.parse(value);
                           _searchName = '';
                         } else {
@@ -87,87 +85,83 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
             ),
-
           ),
-
           SliverAnimatedSwitcher(
             duration: const Duration(milliseconds: 300),
             child: _showFavorites
                 ? FavoritePokemonList(key: const ValueKey('favorites'))
                 : ListPokemon(
-              key: const ValueKey('all'),
-              activeFilters: activeFilters,
-              currentSort: currentSort,
-              searchName: _searchName,
-              searchNumber: _searchNumber,
-              updateFilter: _updateFilter,
-            ),
+                    key: const ValueKey('all'),
+                    activeFilters: activeFilters,
+                    currentSort: currentSort,
+                    searchName: _searchName,
+                    searchNumber: _searchNumber,
+                    updateFilter: _updateFilter,
+                  ),
           ),
         ],
       ),
-      floatingActionButton: ExpandableFab(
-          distance: 60,
-          children: [
-            ActionButton(
-              onPressed: () => {
-                showDialog(
-                  context: context,
-                  builder: (context) {
-                    return SortingDialog(
-                      currentSort: currentSort,
-                      onSortChanged: (sort) {
-                        setState(() {
-                          currentSort = sort;
-                          _updateFilter = true;
-                        });
-                      },
-                    );
+      floatingActionButton: ExpandableFab(distance: 60, children: [
+        ActionButton(
+          onPressed: () => {
+            showDialog(
+              context: context,
+              builder: (context) {
+                return SortingDialog(
+                  currentSort: currentSort,
+                  onSortChanged: (sort) {
+                    setState(() {
+                      currentSort = sort;
+                      _updateFilter = true;
+                    });
                   },
-                )
+                );
               },
-              icon: const Icon(Icons.sort),
-
-            ),
-            ActionButton(
-              onPressed: () => {
-                showDialog(
-                  context: context,
-                  builder: (context) {
-                    return PopupOptionsForList(
-                      currentFilters: activeFilters,
-                      onFiltersChanged: (filters) {
-                        setState(() {
-                          activeFilters = filters;
-                          _updateFilter = true;
-                        });
-                      },
-                    );
+            )
+          },
+          icon: const Icon(Icons.sort),
+        ),
+        ActionButton(
+          onPressed: () => {
+            showDialog(
+              context: context,
+              builder: (context) {
+                return PopupOptionsForList(
+                  currentFilters: activeFilters,
+                  onFiltersChanged: (filters) {
+                    setState(() {
+                      activeFilters = filters;
+                      _updateFilter = true;
+                    });
                   },
-                )
+                );
+              },
+            )
+          },
+          icon: const Icon(Icons.filter_list),
+        ),
+        ActionButton(
+          onPressed: () => {
+            setState(() {
+              _showFavorites = !_showFavorites;
+            })
+          },
+          icon: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            transitionBuilder: (child, animation) {
+              return ScaleTransition(
+                scale: animation,
+                child: child,
+              );
             },
-              icon: const Icon(Icons.filter_list),
+            child: Icon(
+              _showFavorites ? Icons.favorite : Icons.favorite_border,
+              key: ValueKey(_showFavorites),
+              color: _showFavorites ? Colors.red : null,
             ),
-            ActionButton(
-              onPressed: () => {
-                setState(() {
-                  _showFavorites = !_showFavorites;
-                })
-              },
-              icon: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
-                transitionBuilder: (child, animation) {
-                  return ScaleTransition(scale: animation, child: child,);
-                },
-                child: Icon(
-                  _showFavorites ? Icons.favorite : Icons.favorite_border,
-                  key: ValueKey(_showFavorites),
-                  color: _showFavorites ? Colors.red : null,
-                ),
-              ),
-            ),
-          ]
-      ),
-
+          ),
+        ),
+      ]),
     );
   }
 }
