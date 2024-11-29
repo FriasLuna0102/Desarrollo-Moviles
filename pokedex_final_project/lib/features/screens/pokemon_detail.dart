@@ -236,24 +236,6 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> with TickerPr
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-
-        IconButton(
-          icon: const Icon(
-            Icons.share,
-            color: Colors.white,
-            size: 28,
-          ),
-          onPressed: () {
-            showModalBottomSheet(
-              context: context,
-              backgroundColor: Colors.white,
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-              ),
-              builder: (context) => PokemonCardShare(pokemon: widget.pokemon),
-            );
-          },
-        ),
         // Botón de retroceso
         IconButton(
           icon: const Icon(
@@ -263,12 +245,8 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> with TickerPr
           ),
           // onPressed: () => context.goToPokemonList(),
           onPressed: () {
-            // Primero actualizamos el estado
             setState(() {
-              // No es necesario llamar a _toggleFavorite() aquí
-              // ya que solo queremos notificar a la pantalla anterior
             });
-            // Notificamos a la pantalla anterior que hubo un cambio en favoritos
             Navigator.of(context).pop({'isFavorite': isFavorite});
           },
         ),
@@ -283,6 +261,25 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> with TickerPr
             Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(builder: (context) => const HomePage()),
                   (Route<dynamic> route) => false,
+            );
+          },
+        ),
+
+        // Botón de compartir
+        IconButton(
+          icon: const Icon(
+            Icons.share,
+            color: Colors.white,
+            size: 28,
+          ),
+          onPressed: () {
+            showModalBottomSheet(
+              context: context,
+              backgroundColor: Colors.white,
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              builder: (context) => PokemonCardShare(pokemon: widget.pokemon),
             );
           },
         ),
