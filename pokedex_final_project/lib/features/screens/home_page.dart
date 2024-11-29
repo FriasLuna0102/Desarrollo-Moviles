@@ -21,6 +21,7 @@ class _HomePageState extends State<HomePage> {
   int _searchNumber = 0;
   bool _updateFilter = false;
   bool _showFavorites = false;
+  Key _favoritesKey = UniqueKey();
 
   Map<String, Set<String>> activeFilters = {
     'generations': {},
@@ -32,6 +33,12 @@ class _HomePageState extends State<HomePage> {
     order: SortOrder.asc,
     label: 'Lowest Number (First)',
   );
+
+  void _refreshFavorites() {
+    setState(() {
+      _favoritesKey = UniqueKey();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -93,7 +100,7 @@ class _HomePageState extends State<HomePage> {
           SliverAnimatedSwitcher(
             duration: const Duration(milliseconds: 300),
             child: _showFavorites
-                ? FavoritePokemonList(key: const ValueKey('favorites'))
+                ? FavoritePokemonList(key: _favoritesKey)
                 : ListPokemon(
               key: const ValueKey('all'),
               activeFilters: activeFilters,
@@ -151,6 +158,9 @@ class _HomePageState extends State<HomePage> {
               onPressed: () => {
                 setState(() {
                   _showFavorites = !_showFavorites;
+                  if (_showFavorites) {
+                    _refreshFavorites();
+                  }
                 })
               },
               icon: AnimatedSwitcher(

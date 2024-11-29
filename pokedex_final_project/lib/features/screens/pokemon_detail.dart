@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pokedex_final_project/core/theme/trasantions/trasation_custom.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/models/pokemon.dart';
 import '../../core/models/pokemon_evolutions.dart';
 import '../../core/theme/pokemon_colors.dart';
@@ -35,6 +36,7 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> with TickerPr
   @override
   void initState() {
     super.initState();
+    _loadFavoriteStatus();
     _autoRotationController = AnimationController(
       duration: const Duration(milliseconds: 100000),
       vsync: this,
@@ -54,6 +56,52 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> with TickerPr
   void dispose() {
     _autoRotationController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadFavoriteStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    final List<String>? favorites = prefs.getStringList('favorites');
+    if (mounted) {
+      setState(() {
+        isFavorite = favorites?.contains(widget.pokemon.id.toString()) ?? false;
+      });
+    }
+  }
+
+  Future<void> _toggleFavorite() async {
+    final prefs = await SharedPreferences.getInstance();
+    final List<String> favorites = prefs.getStringList('favorites') ?? [];
+    final String pokemonId = widget.pokemon.id.toString();
+
+    setState(() {
+      if (favorites.contains(pokemonId)) {
+        favorites.remove(pokemonId);
+        isFavorite = false;
+      } else {
+        favorites.add(pokemonId);
+        isFavorite = true;
+      }
+    });
+
+    await prefs.setStringList('favorites', favorites);
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+              isFavorite
+                  ? '${widget.pokemon.name.toUpperCase()} agregado a favoritos'
+                  : '${widget.pokemon.name.toUpperCase()} eliminado de favoritos'
+          ),
+          duration: const Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+          action: SnackBarAction(
+            label: 'DESHACER',
+            onPressed: _toggleFavorite,
+          ),
+        ),
+      );
+    }
   }
 
 
@@ -196,7 +244,13 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> with TickerPr
           ),
           // onPressed: () => context.goToPokemonList(),
           onPressed: () {
-            Navigator.pop(context);
+            // Primero actualizamos el estado
+            setState(() {
+              // No es necesario llamar a _toggleFavorite() aquí
+              // ya que solo queremos notificar a la pantalla anterior
+            });
+            // Notificamos a la pantalla anterior que hubo un cambio en favoritos
+            Navigator.of(context).pop({'isFavorite': isFavorite});
           },
         ),
         // Botón de Home
@@ -233,15 +287,11 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> with TickerPr
             child: Icon(
               isFavorite ? Icons.star : Icons.star_border,
               key: ValueKey<bool>(isFavorite),
-              color: Colors.white,
+              color: isFavorite ? Colors.red : Colors.white,
               size: 28,
             ),
           ),
-          onPressed: () {
-            setState(() {
-              isFavorite = !isFavorite;
-            });
-          },
+          onPressed: _toggleFavorite,
         ),
       ],
     );
@@ -411,13 +461,11 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> with TickerPr
   }
 
   Widget _buildEeveeEvolutionsFamily() {
-    // Encontrar Eevee en las evoluciones
     final eevee = widget.pokemon.evolutions.firstWhere(
           (e) => e.id == 133,
       orElse: () => widget.pokemon.evolutions.first,
     );
 
-    // Obtener todas las evoluciones excepto Eevee
     final evolutions = widget.pokemon.evolutions
         .where((e) => e.id != 133)
         .toList();

@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../../core/theme/trasantions/trasation_custom.dart';
 import '../../../graphql/queries/pokemon_detail_by_id.dart';
 import '../../screens/pokemon_detail.dart';
 
@@ -99,10 +100,20 @@ class _PokemonGridItemState extends State<PokemonGridItem> {
               // Navegación al detalle del Pokémon
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (context) => PokemonDetailScreen(pokemon: detailedPokemon),
+                PageTransitions.fadeAndSlide(
+                  page: PokemonDetailScreen(pokemon: detailedPokemon),
                 ),
-              );            },
+              ).then((result) {
+                if (result != null && result is Map<String, dynamic>) {
+                  bool newFavoriteStatus = result['isFavorite'] ?? false;
+                  if (newFavoriteStatus != _isFavorite) {
+                    setState(() {
+                      _isFavorite = newFavoriteStatus;
+                    });
+                  }
+                }
+                _initPrefs();
+              });           },
             onDoubleTap: _toggleFavorite,
             child: Stack(
               children: [
