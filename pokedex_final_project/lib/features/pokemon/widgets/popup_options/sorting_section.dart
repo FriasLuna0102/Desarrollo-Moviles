@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-enum SortField { id, name }
+enum SortField { id, name, type, ability, bst }
+
 enum SortOrder { asc, desc }
 
 class SortOption {
@@ -40,6 +41,36 @@ class SortingSection extends StatelessWidget {
       order: SortOrder.desc,
       label: 'Name (Z-A)',
     ),
+    SortOption(
+      field: SortField.type,
+      order: SortOrder.asc,
+      label: 'Type (A-Z)',
+    ),
+    SortOption(
+      field: SortField.type,
+      order: SortOrder.desc,
+      label: 'Type (Z-A)',
+    ),
+    SortOption(
+      field: SortField.ability,
+      order: SortOrder.asc,
+      label: 'Ability (A-Z)',
+    ),
+    SortOption(
+      field: SortField.ability,
+      order: SortOrder.desc,
+      label: 'Ability (Z-A)',
+    ),
+    SortOption(
+      field: SortField.bst,
+      order: SortOrder.desc,
+      label: 'Power (Highest)',
+    ),
+    SortOption(
+      field: SortField.bst,
+      order: SortOrder.asc,
+      label: 'Power (Lowest)',
+    ),
   ];
 
   const SortingSection({
@@ -54,11 +85,11 @@ class SortingSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ...options.map((option) => RadioListTile<SortOption>(
-          title: Text(option.label),
-          value: option,
-          groupValue: selectedOption,
-          onChanged: (value) => onSortChange(value!),
-        )),
+              title: Text(option.label),
+              value: option,
+              groupValue: selectedOption,
+              onChanged: (value) => onSortChange(value!),
+            )),
       ],
     );
   }
