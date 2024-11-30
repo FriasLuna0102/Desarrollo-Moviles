@@ -56,4 +56,5 @@ query listPokemons(
      generation_id
    }
  }
-}""";
+}
+""";
