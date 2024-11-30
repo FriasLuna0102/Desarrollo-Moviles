@@ -37,9 +37,7 @@ class PageTransitions {
 
 }
 
-// Ejemplo de uso:
 extension NavigationExtensions on BuildContext {
-  // Ir a la pantalla de detalle del Pokémon
   void goToPokemonDetail(Pokemon pokemon) {
     Navigator.push(
       this,
@@ -49,7 +47,6 @@ extension NavigationExtensions on BuildContext {
     );
   }
 
-  // Volver a la lista de Pokémon
   void goToPokemonList() {
     Navigator.pushReplacement(
       this,

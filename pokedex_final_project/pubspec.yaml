@@ -40,6 +40,12 @@ dependencies:
   infinite_scroll_pagination: ^4.1.0
   shared_preferences: ^2.3.3
   sliver_tools: ^0.2.12
+  share_plus: ^7.0.0
+  path_provider: ^2.0.15
+  just_audio: ^0.9.36
+  just_audio_background: ^0.0.1-beta.11
+  fl_chart: ^0.66.0
+
 
 dev_dependencies:
   flutter_test:

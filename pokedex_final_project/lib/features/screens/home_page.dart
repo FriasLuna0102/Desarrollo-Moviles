@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pokedex_final_project/features/screens/pokemon_comparation.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 import 'package:string_validator/string_validator.dart';
 import '../pokemon/widgets/favorites/favorite_pokemon_list.dart';
@@ -21,6 +22,7 @@ class _HomePageState extends State<HomePage> {
   int _searchNumber = 0;
   bool _updateFilter = false;
   bool _showFavorites = false;
+  Key _favoritesKey = UniqueKey();
 
   Map<String, Set<String>> activeFilters = {
     'generations': {},
@@ -32,6 +34,12 @@ class _HomePageState extends State<HomePage> {
     order: SortOrder.asc,
     label: 'Lowest Number (First)',
   );
+
+  void _refreshFavorites() {
+    setState(() {
+      _favoritesKey = UniqueKey();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -55,33 +63,60 @@ class _HomePageState extends State<HomePage> {
               backgroundColor: Colors.red,
               title: Padding(
                 padding: EdgeInsets.all(8.0),
-                child: Container(
-                  height: 40,
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(15),
-                      color: Colors.white),
-                  child: TextField(
-                    decoration: InputDecoration(
-                      hintText: "Search",
-                      hintStyle: TextStyle(color: Colors.grey),
-                      suffixIcon: Icon(Icons.search),
-                      border: InputBorder.none,
-                      contentPadding:
-                          EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        height: 40,
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(15),
+                            color: Colors.white
+                        ),
+                        child: TextField(
+                          decoration: InputDecoration(
+                            hintText: "Search",
+                            hintStyle: TextStyle(color: Colors.grey),
+                            suffixIcon: Icon(Icons.search),
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                          ),
+                          onChanged: (String value) {
+                            setState(() {
+                              value = value.trim();
+                              if (isNumeric(value)){
+                                _searchNumber = int.parse(value);
+                                _searchName = '';
+                              } else {
+                                _searchName = value;
+                                _searchNumber = 0;
+                              }
+                            });
+                          },
+                        ),
+                      ),
                     ),
-                    onChanged: (String value) {
-                      setState(() {
-                        value = value.trim();
-                        if (isNumeric(value)) {
-                          _searchNumber = int.parse(value);
-                          _searchName = '';
-                        } else {
-                          _searchName = value;
-                          _searchNumber = 0;
-                        }
-                      });
-                    },
-                  ),
+                    const SizedBox(width: 8),
+                    Container(
+                      height: 40,
+                      width: 40,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15),
+                        color: Colors.white,
+                      ),
+                      child: IconButton(
+                        icon: const Icon(Icons.compare_arrows),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const PokemonComparisonScreen(),
+                            ),
+                          );
+                        },
+                        tooltip: 'Comparar Pokémon',
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -89,7 +124,7 @@ class _HomePageState extends State<HomePage> {
           SliverAnimatedSwitcher(
             duration: const Duration(milliseconds: 300),
             child: _showFavorites
-                ? FavoritePokemonList(key: const ValueKey('favorites'))
+                ? FavoritePokemonList(key: _favoritesKey)
                 : ListPokemon(
                     key: const ValueKey('all'),
                     activeFilters: activeFilters,
@@ -134,6 +169,18 @@ class _HomePageState extends State<HomePage> {
                       _updateFilter = true;
                     });
                   },
+                )
+            },
+              icon: const Icon(Icons.filter_list),
+            ),
+            ActionButton(
+              onPressed: () => {
+                setState(() {
+                  _showFavorites = !_showFavorites;
+                  if (_showFavorites) {
+                    _refreshFavorites();
+                  }
+                })
                 );
               },
             )

@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:pokedex_final_project/core/theme/trasantions/trasation_custom.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../core/models/pokemon.dart';
 import '../../core/models/pokemon_evolutions.dart';
 import '../../core/theme/pokemon_colors.dart';
 import '../../graphql/queries/pokemon_detail_by_id.dart';
+import '../pokemon/widgets/pokemon_card_share.dart';
+import '../pokemon/widgets/pokemon_cry_player.dart';
+import '../pokemon/widgets/pokemon_evolution_chain.dart';
 import '../pokemon/widgets/pokemon_mega_evolutions.dart';
 import '../pokemon/widgets/pokemon_metric_card.dart';
 import '../pokemon/widgets/pokemon_moves_widget.dart';
@@ -27,6 +31,7 @@ class PokemonDetailScreen extends StatefulWidget {
 class _PokemonDetailScreenState extends State<PokemonDetailScreen> with TickerProviderStateMixin {
 
   bool isFavorite = false;
+  bool isLoading = false;
   double _rotationValue = 0.0;
   double _lastRotation = 0.0;
   bool _isDragging = false;
@@ -35,6 +40,7 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> with TickerPr
   @override
   void initState() {
     super.initState();
+    _loadFavoriteStatus();
     _autoRotationController = AnimationController(
       duration: const Duration(milliseconds: 100000),
       vsync: this,
@@ -54,6 +60,95 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> with TickerPr
   void dispose() {
     _autoRotationController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadFavoriteStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    final List<String>? favorites = prefs.getStringList('favorites');
+    if (mounted) {
+      setState(() {
+        isFavorite = favorites?.contains(widget.pokemon.id.toString()) ?? false;
+      });
+    }
+  }
+
+  Future<void> _toggleFavorite() async {
+    final prefs = await SharedPreferences.getInstance();
+    final List<String> favorites = prefs.getStringList('favorites') ?? [];
+    final String pokemonId = widget.pokemon.id.toString();
+
+    setState(() {
+      if (favorites.contains(pokemonId)) {
+        favorites.remove(pokemonId);
+        isFavorite = false;
+      } else {
+        favorites.add(pokemonId);
+        isFavorite = true;
+      }
+    });
+
+    await prefs.setStringList('favorites', favorites);
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+              isFavorite
+                  ? '${widget.pokemon.name.toUpperCase()} agregado a favoritos'
+                  : '${widget.pokemon.name.toUpperCase()} eliminado de favoritos'
+          ),
+          duration: const Duration(seconds: 2),
+          behavior: SnackBarBehavior.floating,
+          action: SnackBarAction(
+            label: 'DESHACER',
+            onPressed: _toggleFavorite,
+          ),
+        ),
+      );
+    }
+  }
+
+  Future<void> _navigateToPokemon(int id) async {
+    if (isLoading) return;
+
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      final pokemon = await fetchPokemonDetails(id);
+      if (mounted) {
+        Navigator.pushReplacement(
+          context,
+          PageRouteBuilder(
+            pageBuilder: (context, animation, secondaryAnimation) => PokemonDetailScreen(pokemon: pokemon),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              const begin = Offset(1.0, 0.0);
+              const end = Offset.zero;
+              const curve = Curves.easeInOut;
+              var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+              var offsetAnimation = animation.drive(tween);
+              return SlideTransition(position: offsetAnimation, child: child);
+            },
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al cargar el Pokémon: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+    }
   }
 
 
@@ -79,24 +174,92 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> with TickerPr
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[100],
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            const SizedBox(height: 30),
-            _buildHeaderCard(),
-            const SizedBox(height: 16),
-            _buildStatsSection(),
-            const SizedBox(height: 16),
-            _buildTypeRelationsSection(),
-            const SizedBox(height: 16),
-            _buildAbilitiesSection(),
-            const SizedBox(height: 16),
-            _buildEvolutionSection(),
-            const SizedBox(height: 16),
-            _buildMegaEvolutionsSection(),
-            const SizedBox(height: 16),
-            _buildMovesSection(),
+      body: Stack(
+        children: [
+          SingleChildScrollView(
+            child: Column(
+              children: [
+                const SizedBox(height: 30),
+                _buildHeaderCard(),
+                const SizedBox(height: 16),
+                _buildStatsSection(),
+                const SizedBox(height: 16),
+                _buildTypeRelationsSection(),
+                const SizedBox(height: 16),
+                _buildAbilitiesSection(),
+                const SizedBox(height: 16),
+                _buildEvolutionSection(),
+                const SizedBox(height: 16),
+                _buildMegaEvolutionsSection(),
+                const SizedBox(height: 16),
+                _buildMovesSection(),
+              ],
+            ),
+          ),
+          // Botones de navegación laterales
+          if (!isLoading) ...[
+            // Botón Anterior
+            Positioned(
+              left: 0,
+              top: MediaQuery.of(context).size.height / 2 - 30,
+              child: widget.pokemon.id > 1 ? _buildNavigationButton(
+                icon: Icons.arrow_back_ios,
+                onPressed: () => _navigateToPokemon(widget.pokemon.id - 1),
+              ) : const SizedBox(),
+            ),
+            // Botón Siguiente
+            Positioned(
+              right: 0,
+              top: MediaQuery.of(context).size.height / 2 - 30,
+              child: _buildNavigationButton(
+                icon: Icons.arrow_forward_ios,
+                onPressed: () => _navigateToPokemon(widget.pokemon.id + 1),
+              ),
+            ),
           ],
+          // Indicador de carga
+          if (isLoading)
+            Container(
+              color: Colors.black.withOpacity(0.3),
+              child: const Center(
+                child: CircularProgressIndicator(),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNavigationButton({
+    required IconData icon,
+    required VoidCallback onPressed,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.9),
+        borderRadius: BorderRadius.circular(30),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            spreadRadius: 1,
+            blurRadius: 5,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(30),
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            child: Icon(
+              icon,
+              color: Colors.black87,
+              size: 24,
+            ),
+          ),
         ),
       ),
     );
@@ -196,7 +359,9 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> with TickerPr
           ),
           // onPressed: () => context.goToPokemonList(),
           onPressed: () {
-            Navigator.pop(context);
+            setState(() {
+            });
+            Navigator.of(context).pop({'isFavorite': isFavorite});
           },
         ),
         // Botón de Home
@@ -210,6 +375,23 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> with TickerPr
             Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(builder: (context) => const HomePage()),
                   (Route<dynamic> route) => false,
+            );
+          },
+        ),
+
+        // Botón de compartir
+        IconButton(
+          icon: const Icon(
+            Icons.share,
+            color: Colors.white,
+            size: 28,
+          ),
+          onPressed: () {
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              backgroundColor: Colors.transparent,
+              builder: (context) => PokemonCardShareScreen(pokemon: widget.pokemon),
             );
           },
         ),
@@ -233,28 +415,34 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> with TickerPr
             child: Icon(
               isFavorite ? Icons.star : Icons.star_border,
               key: ValueKey<bool>(isFavorite),
-              color: Colors.white,
+              color: isFavorite ? Colors.red : Colors.white,
               size: 28,
             ),
           ),
-          onPressed: () {
-            setState(() {
-              isFavorite = !isFavorite;
-            });
-          },
+          onPressed: _toggleFavorite,
         ),
       ],
     );
   }
 
   Widget _buildPokemonName() {
-    return Text(
-      widget.pokemon.name.toUpperCase(),
-      style: const TextStyle(
-        fontSize: 24,
-        fontWeight: FontWeight.bold,
-        color: Colors.white,
-      ),
+    return Column(
+      children: [
+        Text(
+          widget.pokemon.name.toUpperCase(),
+          style: const TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        const SizedBox(height: 8),
+        PokemonCryPlayer(
+          pokemonId: widget.pokemon.id,
+          pokemonName: widget.pokemon.name,
+          backgroundColor: PokemonColors.getTypeColor(widget.pokemon.types.first.name),
+        ),
+      ],
     );
   }
 
@@ -355,69 +543,18 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> with TickerPr
       return const SizedBox.shrink();
     }
 
-    // Detectar si es familia de Eevee (incluyendo Eevee y sus evoluciones)
-    bool isEeveeFamily = widget.pokemon.evolutions.any((e) => e.id == 133) ||
-        widget.pokemon.id == 133;
-
-    List<Color> gradientColors = widget.pokemon.types.length > 1
-        ? [
-      PokemonColors.getTypeColor(widget.pokemon.types[0].name),
-      PokemonColors.getTypeColor(widget.pokemon.types[1].name),
-    ]
-        : [
-      PokemonColors.getTypeColor(widget.pokemon.types[0].name).withOpacity(0.7),
-      PokemonColors.getTypeColor(widget.pokemon.types[0].name).withOpacity(0.3),
-    ];
-
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: gradientColors,
-        ),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Padding(
-            padding: EdgeInsets.only(left: 16, bottom: 16),
-            child: Center(
-              child: Text(
-                'Evoluciones',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ),
-          isEeveeFamily
-              ? _buildEeveeEvolutionsFamily()
-              : SizedBox(
-            height: 200,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: _buildEvolutionChain(),
-            ),
-          ),
-        ],
-      ),
+    return PokemonEvolutionChain(
+      evolutions: widget.pokemon.evolutions,
+      backgroundColor: PokemonColors.getTypeColor(widget.pokemon.types.first.name),
     );
   }
 
   Widget _buildEeveeEvolutionsFamily() {
-    // Encontrar Eevee en las evoluciones
     final eevee = widget.pokemon.evolutions.firstWhere(
           (e) => e.id == 133,
       orElse: () => widget.pokemon.evolutions.first,
     );
 
-    // Obtener todas las evoluciones excepto Eevee
     final evolutions = widget.pokemon.evolutions
         .where((e) => e.id != 133)
         .toList();
