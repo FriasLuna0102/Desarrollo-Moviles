@@ -2,6 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 
+// Singleton para el AudioPlayer
+class AudioPlayerSingleton {
+  static AudioPlayer? _instance;
+
+  static AudioPlayer get instance {
+    _instance ??= AudioPlayer();
+    return _instance!;
+  }
+
+  static void dispose() {
+    _instance?.dispose();
+    _instance = null;
+  }
+}
+
 class PokemonCryPlayer extends StatefulWidget {
   final int pokemonId;
   final String pokemonName;
@@ -19,29 +34,20 @@ class PokemonCryPlayer extends StatefulWidget {
 }
 
 class _PokemonCryPlayerState extends State<PokemonCryPlayer> {
-  AudioPlayer? _player;
   bool _isPlaying = false;
   bool _isLoading = false;
   bool _hasError = false;
 
-  @override
-  void initState() {
-    super.initState();
-    _initializePlayer();
-  }
-
-  Future<void> _initializePlayer() async {
-    _player = AudioPlayer();
-  }
+  AudioPlayer get _player => AudioPlayerSingleton.instance;
 
   @override
   void dispose() {
-    _player?.dispose();
+    // No disponemos del player aquí, ya que es compartido
     super.dispose();
   }
 
   Future<void> _playPokemonCry() async {
-    if (_isPlaying || _isLoading || _player == null) return;
+    if (_isPlaying || _isLoading) return;
 
     setState(() {
       _isLoading = true;
@@ -49,12 +55,12 @@ class _PokemonCryPlayerState extends State<PokemonCryPlayer> {
     });
 
     try {
-      // URL actualizada para usar la nueva estructura
-      String cryUrl = 'https://pokemoncries.com/cries/${widget.pokemonId}.mp3';
+      // Detener cualquier reproducción previa
+      await _player.stop();
 
+      String cryUrl = 'https://pokemoncries.com/cries/${widget.pokemonId}.mp3';
       debugPrint('Intentando reproducir: $cryUrl');
 
-      // Crear el MediaItem
       final mediaItem = MediaItem(
         id: widget.pokemonId.toString(),
         title: "${widget.pokemonName}'s Cry",
@@ -62,21 +68,20 @@ class _PokemonCryPlayerState extends State<PokemonCryPlayer> {
         artUri: Uri.parse('https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/home/${widget.pokemonId}.png'),
       );
 
-      // Configurar el audio source con el MediaItem
       final audioSource = AudioSource.uri(
         Uri.parse(cryUrl),
         tag: mediaItem,
       );
 
-      await _player!.setAudioSource(audioSource);
-      await _player!.play();
+      await _player.setAudioSource(audioSource);
+      await _player.play();
 
       setState(() {
         _isPlaying = true;
         _isLoading = false;
       });
 
-      _player!.playerStateStream.listen((state) {
+      _player.playerStateStream.listen((state) {
         if (state.processingState == ProcessingState.completed) {
           if (mounted) {
             setState(() {
@@ -84,6 +89,8 @@ class _PokemonCryPlayerState extends State<PokemonCryPlayer> {
             });
           }
         }
+      }, onError: (error) {
+        debugPrint('Error en stream de reproducción: $error');
       });
 
     } catch (e) {
@@ -105,10 +112,10 @@ class _PokemonCryPlayerState extends State<PokemonCryPlayer> {
   }
 
   Future<void> _stopPlaying() async {
-    if (!_isPlaying || _player == null) return;
+    if (!_isPlaying) return;
 
     try {
-      await _player!.stop();
+      await _player.stop();
       setState(() {
         _isPlaying = false;
       });
