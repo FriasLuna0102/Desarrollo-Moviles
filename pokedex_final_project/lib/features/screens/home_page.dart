@@ -27,6 +27,7 @@ class _HomePageState extends State<HomePage> {
   Map<String, Set<String>> activeFilters = {
     'generations': {},
     'types': {},
+    'abilities': {},
   };
 
   SortOption currentSort = const SortOption(

@@ -55,6 +55,7 @@ class _ListPokemonState extends State<ListPokemon> {
     try {
       final client = GraphQLProvider.of(context).value;
       QueryOptions options;
+      final selectedAbility = widget.activeFilters['abilities']?.firstOrNull;
 
       if (widget.searchNumber != 0) {
         options = QueryOptions(
@@ -79,6 +80,7 @@ class _ListPokemonState extends State<ListPokemon> {
                   'searchName': widget.searchName.isEmpty
                       ? '%%'
                       : '%${widget.searchName.toLowerCase()}%',
+                  'ability': selectedAbility != null ? selectedAbility : '%%',
                 });
             break;
 
@@ -98,6 +100,7 @@ class _ListPokemonState extends State<ListPokemon> {
                   'searchName': widget.searchName.isEmpty
                       ? '%%'
                       : '%${widget.searchName.toLowerCase()}%',
+                  'ability': selectedAbility != null ? selectedAbility : '%%',
                 });
             break;
 
@@ -125,6 +128,7 @@ class _ListPokemonState extends State<ListPokemon> {
                   'searchName': widget.searchName.isEmpty
                       ? '%%'
                       : '%${widget.searchName.toLowerCase()}%',
+                  'ability': selectedAbility != null ? selectedAbility : '%%',
                 });
             break;
 
@@ -149,6 +153,7 @@ class _ListPokemonState extends State<ListPokemon> {
                   'searchName': widget.searchName.isEmpty
                       ? '%%'
                       : '%${widget.searchName.toLowerCase()}%',
+                  'ability': selectedAbility != null ? selectedAbility : '%%',
                 });
         }
       }

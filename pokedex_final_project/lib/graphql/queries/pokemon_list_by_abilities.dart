@@ -5,7 +5,8 @@ query orderByAbilities(
   \$limit: Int,
   \$types: [String!], 
   \$generations: [Int!],
-  \$searchName: String
+  \$searchName: String,
+  \$ability: String
 ) {
   pokemon_v2_pokemonability(
     order_by: {pokemon_v2_ability: {name: \$name}, pokemon_v2_pokemon: {id: asc}},
@@ -13,6 +14,13 @@ query orderByAbilities(
     limit: \$limit,
     where: {
       _and: [
+        {
+          pokemon_v2_ability: {
+            name: {
+              _ilike: \$ability
+            }
+          }
+        },
         {
           pokemon_v2_pokemon: {
             pokemon_v2_pokemontypes: {

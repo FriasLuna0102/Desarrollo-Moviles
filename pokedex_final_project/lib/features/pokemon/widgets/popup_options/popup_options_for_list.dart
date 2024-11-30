@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
-
+import 'ability_autocomplete.dart';
 import 'filter_section.dart';
+
+final selectedAbility = ValueNotifier<String>('');
+final abilitiesExpanded = ValueNotifier<bool>(false);
 
 class PopupOptionsForList extends StatefulWidget {
   final Map<String, Set<String>> currentFilters;
@@ -92,34 +95,79 @@ class _PopupOptionsForListState extends State<PopupOptionsForList> {
                   },
                   expandedNotifier: typesExpanded,
                 ),
-                // FilterSection(
-                //   title: "Abilities",
-                //   options: [
-                //     "Overgrow",
-                //     "Chlorophyll",
-                //     "Blaze",
-                //     "Solar Power",
-                //     "Torrent",
-                //     "Rain Dish",
-                //     "Shield Dust",
-                //     "Run Away",
-                //     "Keen Eye",
-                //     "Intimidate",
-                //     "Static",
-                //     "Lightning Rod",
-                //   ],
-                //   onFilterChange: (filters) {
-                //     selectedFilters['types'] = filters;
-                //     widget.onFiltersChanged(selectedFilters);
-                //   },
-                // )
+                Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    InkWell(
+                      borderRadius: BorderRadius.circular(15),
+                      onTap: () {
+                        abilitiesExpanded.value = !abilitiesExpanded.value;
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 6.0),
+                        child: Row(
+                          children: [
+                            const Text(
+                              "Abilities",
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            ValueListenableBuilder(
+                              valueListenable: abilitiesExpanded,
+                              builder: (context, isExpanded, child) {
+                                return AnimatedRotation(
+                                  duration: const Duration(milliseconds: 200),
+                                  turns: isExpanded ? 0.5 : 0,
+                                  child: const Icon(Icons.arrow_drop_down_sharp),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    ValueListenableBuilder<bool>(
+                      valueListenable: abilitiesExpanded,
+                      builder: (context, isExpanded, child) {
+                        return AnimatedSize(
+                          duration: const Duration(milliseconds: 200),
+                          curve: Curves.easeInOut,
+                          child: ClipRect(
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              height: isExpanded ? null : 0,
+                              child: Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: AbilityAutocomplete(
+                                  onAbilitySelected: (ability) {
+                                    setState(() {
+                                      widget.currentFilters['abilities'] = {ability};
+                                      widget.onFiltersChanged(widget.currentFilters);
+                                    });
+                                  },
+                                  selectedAbility: selectedAbility,
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
                 Center(
                   child: OutlinedButton(
                     onPressed: () {
+                      setState(() {
                         widget.currentFilters.forEach((key, value) {
                           value.clear();
                         });
                         widget.onFiltersChanged(widget.currentFilters);
+                        selectedAbility.value = '';
+                      });
                     },
                     style: OutlinedButton.styleFrom(
                       foregroundColor: Colors.red,

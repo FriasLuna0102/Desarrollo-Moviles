@@ -4,6 +4,7 @@ query listPokemons(
  \$generations: [Int!],
  \$orderBy: [pokemon_v2_pokemon_order_by!],
  \$searchName: String,
+ \$ability: String,
  \$offset: Int,
  \$limit: Int
 ) {
@@ -38,6 +39,15 @@ query listPokemons(
           name: {
             _ilike: \$searchName
           }
+       },
+       {
+         pokemon_v2_pokemonabilities: {
+           pokemon_v2_ability: {
+             name: {
+               _ilike: \$ability
+             }
+           }
+         }
        }
      ]
    }
@@ -56,5 +66,4 @@ query listPokemons(
      generation_id
    }
  }
-}
-""";
+}""";
