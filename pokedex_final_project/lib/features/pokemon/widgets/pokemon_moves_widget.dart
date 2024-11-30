@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-
+import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
 import '../../../core/models/pokemon_move.dart';
 
-
-class PokemonMovesWidget extends StatelessWidget {
+class PokemonMovesWidget extends StatefulWidget {
   final List<PokemonMove> moves;
   final Color backgroundColor;
 
@@ -14,12 +13,54 @@ class PokemonMovesWidget extends StatelessWidget {
   });
 
   @override
+  State<PokemonMovesWidget> createState() => _PokemonMovesWidgetState();
+}
+
+class _PokemonMovesWidgetState extends State<PokemonMovesWidget> {
+  static const _pageSize = 5;
+  final PagingController<int, PokemonMove> _pagingController =
+  PagingController(firstPageKey: 0);
+
+  @override
+  void initState() {
+    super.initState();
+    _pagingController.addPageRequestListener(_fetchPage);
+  }
+
+  @override
+  void dispose() {
+    _pagingController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _fetchPage(int pageKey) async {
+    try {
+      final startIndex = pageKey * _pageSize;
+      final endIndex = startIndex + _pageSize;
+      final isLastPage = endIndex >= widget.moves.length;
+
+      if (isLastPage) {
+        _pagingController.appendLastPage(
+          widget.moves.sublist(startIndex),
+        );
+      } else {
+        _pagingController.appendPage(
+          widget.moves.sublist(startIndex, endIndex),
+          pageKey + 1,
+        );
+      }
+    } catch (error) {
+      _pagingController.error = error;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: backgroundColor,
+        color: widget.backgroundColor,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
@@ -43,7 +84,36 @@ class PokemonMovesWidget extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          ...moves.map((move) => _buildMoveCard(move)).toList(),
+          SizedBox(
+            height: 400, // Altura fija para el contenedor de movimientos
+            child: PagedListView<int, PokemonMove>(
+              pagingController: _pagingController,
+              builderDelegate: PagedChildBuilderDelegate<PokemonMove>(
+                itemBuilder: (context, move, index) => _buildMoveCard(move),
+                firstPageProgressIndicatorBuilder: (_) => const Center(
+                  child: CircularProgressIndicator(
+                    color: Colors.white,
+                  ),
+                ),
+                noItemsFoundIndicatorBuilder: (_) => const Center(
+                  child: Text(
+                    'No hay movimientos disponibles',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Center(
+            child: Text(
+              'Desliza para ver más movimientos',
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.8),
+                fontSize: 12,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -76,7 +146,7 @@ class PokemonMovesWidget extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: backgroundColor.withOpacity(0.8),
+                    color: widget.backgroundColor.withOpacity(0.8),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(

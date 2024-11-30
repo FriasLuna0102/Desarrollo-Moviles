@@ -83,7 +83,7 @@ Future<Pokemon> fetchPokemonDetails(int id) async {
           level: {_gt: 0}
         },
         order_by: {level: asc},
-        limit: 4
+        limit: 100
       ) {
         level
         pokemon_v2_move {
