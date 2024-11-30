@@ -140,15 +140,23 @@ class _PokemonGridItemState extends State<PokemonGridItem> {
                         const SizedBox(height: 8),
                         Expanded(
                           child: Center(
-                            child: CachedNetworkImage(
-                              imageUrl: spriteUrl,
-                              fit: BoxFit.contain,
-                              placeholder: (context, url) => const Center(
-                                child: CircularProgressIndicator(),
-                              ),
-                              errorWidget: (context, url, error) => const Icon(
+                            child: Center(
+                              child: spriteUrl != null
+                                  ? CachedNetworkImage(
+                                imageUrl: spriteUrl,
+                                fit: BoxFit.contain,
+                                placeholder: (context, url) => const Center(
+                                  child: CircularProgressIndicator(),
+                                ),
+                                errorWidget: (context, url, error) => const Icon(
+                                  Icons.broken_image,
+                                  size: 96,
+                                ),
+                              )
+                                  : const Icon(  // Este es el caso cuando spriteUrl es null
                                 Icons.broken_image,
                                 size: 96,
+                                color: Colors.white,  // Para que sea visible sobre el fondo de colores
                               ),
                             ),
                           ),

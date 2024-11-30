@@ -47,20 +47,18 @@ class _HomePageState extends State<HomePage> {
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
-            title: const Text("Pokedex",
+            title: const Text(
+              "Pokedex",
               style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-                fontSize: 27
-
-              ),
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  fontSize: 27),
             ),
             backgroundColor: Colors.red,
             floating: true,
             pinned: true,
             snap: true,
             centerTitle: false,
-
             bottom: AppBar(
               backgroundColor: Colors.red,
               title: Padding(
@@ -122,61 +120,54 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
             ),
-
           ),
-
           SliverAnimatedSwitcher(
             duration: const Duration(milliseconds: 300),
             child: _showFavorites
                 ? FavoritePokemonList(key: _favoritesKey)
                 : ListPokemon(
-              key: const ValueKey('all'),
-              activeFilters: activeFilters,
-              currentSort: currentSort,
-              searchName: _searchName,
-              searchNumber: _searchNumber,
-              updateFilter: _updateFilter,
-            ),
+                    key: const ValueKey('all'),
+                    activeFilters: activeFilters,
+                    currentSort: currentSort,
+                    searchName: _searchName,
+                    searchNumber: _searchNumber,
+                    updateFilter: _updateFilter,
+                  ),
           ),
         ],
       ),
-      floatingActionButton: ExpandableFab(
-          distance: 60,
-          children: [
-            ActionButton(
-              onPressed: () => {
-                showDialog(
-                  context: context,
-                  builder: (context) {
-                    return SortingDialog(
-                      currentSort: currentSort,
-                      onSortChanged: (sort) {
-                        setState(() {
-                          currentSort = sort;
-                          _updateFilter = true;
-                        });
-                      },
-                    );
+      floatingActionButton: ExpandableFab(distance: 60, children: [
+        ActionButton(
+          onPressed: () => {
+            showDialog(
+              context: context,
+              builder: (context) {
+                return SortingDialog(
+                  currentSort: currentSort,
+                  onSortChanged: (sort) {
+                    setState(() {
+                      currentSort = sort;
+                      _updateFilter = true;
+                    });
                   },
-                )
+                );
               },
-              icon: const Icon(Icons.sort),
-
-            ),
-            ActionButton(
-              onPressed: () => {
-                showDialog(
-                  context: context,
-                  builder: (context) {
-                    return PopupOptionsForList(
-                      currentFilters: activeFilters,
-                      onFiltersChanged: (filters) {
-                        setState(() {
-                          activeFilters = filters;
-                          _updateFilter = true;
-                        });
-                      },
-                    );
+            )
+          },
+          icon: const Icon(Icons.sort),
+        ),
+        ActionButton(
+          onPressed: () => {
+            showDialog(
+              context: context,
+              builder: (context) {
+                return PopupOptionsForList(
+                  currentFilters: activeFilters,
+                  onFiltersChanged: (filters) {
+                    setState(() {
+                      activeFilters = filters;
+                      _updateFilter = true;
+                    });
                   },
                 )
             },
@@ -190,22 +181,34 @@ class _HomePageState extends State<HomePage> {
                     _refreshFavorites();
                   }
                 })
+                );
               },
-              icon: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
-                transitionBuilder: (child, animation) {
-                  return ScaleTransition(scale: animation, child: child,);
-                },
-                child: Icon(
-                  _showFavorites ? Icons.favorite : Icons.favorite_border,
-                  key: ValueKey(_showFavorites),
-                  color: _showFavorites ? Colors.red : null,
-                ),
-              ),
+            )
+          },
+          icon: const Icon(Icons.filter_list),
+        ),
+        ActionButton(
+          onPressed: () => {
+            setState(() {
+              _showFavorites = !_showFavorites;
+            })
+          },
+          icon: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 300),
+            transitionBuilder: (child, animation) {
+              return ScaleTransition(
+                scale: animation,
+                child: child,
+              );
+            },
+            child: Icon(
+              _showFavorites ? Icons.favorite : Icons.favorite_border,
+              key: ValueKey(_showFavorites),
+              color: _showFavorites ? Colors.red : null,
             ),
-          ]
-      ),
-
+          ),
+        ),
+      ]),
     );
   }
 }
