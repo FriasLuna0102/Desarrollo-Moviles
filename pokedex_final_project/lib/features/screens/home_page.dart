@@ -11,7 +11,14 @@ import '../pokemon/widgets/popup_options/sorting_dialog.dart';
 import '../pokemon/widgets/popup_options/sorting_section.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+  final Map<String, Set<String>>? initialFilters;
+  final bool showFilteredResults;
+
+  const HomePage({
+    super.key,
+    this.initialFilters,
+    this.showFilteredResults = false,
+  });
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -23,12 +30,17 @@ class _HomePageState extends State<HomePage> {
   bool _updateFilter = false;
   bool _showFavorites = false;
   Key _favoritesKey = UniqueKey();
+  late Map<String, Set<String>> activeFilters;
 
-  Map<String, Set<String>> activeFilters = {
-    'generations': {},
-    'types': {},
-    'abilities': {},
-  };
+  @override
+  void initState() {
+    super.initState();
+    activeFilters = widget.initialFilters ?? {
+      'generations': {},
+      'types': {},
+      'abilities': {},
+    };
+  }
 
   SortOption currentSort = const SortOption(
     field: SortField.id,

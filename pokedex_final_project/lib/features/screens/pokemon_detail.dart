@@ -4,6 +4,7 @@ import '../../core/models/pokemon.dart';
 import '../../core/models/pokemon_evolutions.dart';
 import '../../core/theme/pokemon_colors.dart';
 import '../../graphql/queries/pokemon_detail_by_id.dart';
+import '../pokemon/widgets/navigation_widget.dart';
 import '../pokemon/widgets/pokemon_card_share.dart';
 import '../pokemon/widgets/pokemon_cry_player.dart';
 import '../pokemon/widgets/pokemon_mega_evolutions.dart';
@@ -532,9 +533,13 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> with TickerPr
       children: [
         Wrap(
           spacing: 8,
-          children: widget.pokemon.types
-              .map((type) => PokemonTypeChip(type: type))
-              .toList(),
+          children: widget.pokemon.types.map((type) => InkWell(
+            onTap: () => NavigationUtils.navigateToFilteredList(
+              context: context,
+              type: type.name,
+            ),
+            child: PokemonTypeChip(type: type),
+          )).toList(),
         ),
       ],
     );
@@ -602,13 +607,19 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> with TickerPr
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: widget.pokemon.abilities.map((ability) => Chip(
-            backgroundColor: PokemonColors.getTypeColor(
-              widget.pokemon.types.first.name,
+          children: widget.pokemon.abilities.map((ability) => InkWell(
+            onTap: () => NavigationUtils.navigateToFilteredList(
+              context: context,
+              ability: ability.name,
             ),
-            label: Text(
-              ability.name.toUpperCase(),
-              style: const TextStyle(color: Colors.white),
+            child: Chip(
+              backgroundColor: PokemonColors.getTypeColor(
+                widget.pokemon.types.first.name,
+              ),
+              label: Text(
+                ability.name.toUpperCase(),
+                style: const TextStyle(color: Colors.white),
+              ),
             ),
           )).toList(),
         ),
