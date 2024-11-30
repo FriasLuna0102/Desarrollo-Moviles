@@ -6,6 +6,7 @@ import '../../core/models/pokemon_evolutions.dart';
 import '../../core/theme/pokemon_colors.dart';
 import '../../graphql/queries/pokemon_detail_by_id.dart';
 import '../pokemon/widgets/pokemon_card_share.dart';
+import '../pokemon/widgets/pokemon_cry_player.dart';
 import '../pokemon/widgets/pokemon_evolution_chain.dart';
 import '../pokemon/widgets/pokemon_mega_evolutions.dart';
 import '../pokemon/widgets/pokemon_metric_card.dart';
@@ -425,13 +426,23 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> with TickerPr
   }
 
   Widget _buildPokemonName() {
-    return Text(
-      widget.pokemon.name.toUpperCase(),
-      style: const TextStyle(
-        fontSize: 24,
-        fontWeight: FontWeight.bold,
-        color: Colors.white,
-      ),
+    return Column(
+      children: [
+        Text(
+          widget.pokemon.name.toUpperCase(),
+          style: const TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        const SizedBox(height: 8),
+        PokemonCryPlayer(
+          pokemonId: widget.pokemon.id,
+          pokemonName: widget.pokemon.name,
+          backgroundColor: PokemonColors.getTypeColor(widget.pokemon.types.first.name),
+        ),
+      ],
     );
   }
 

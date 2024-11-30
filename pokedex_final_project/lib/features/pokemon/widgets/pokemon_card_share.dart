@@ -1,5 +1,5 @@
 import 'dart:io';
-import 'dart:typed_data';  // Este import es para ByteData y Uint8List
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
