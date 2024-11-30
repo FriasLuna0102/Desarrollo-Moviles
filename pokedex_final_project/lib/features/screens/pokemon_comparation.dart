@@ -120,71 +120,69 @@ class EnhancedPokemonComparison extends StatefulWidget {
         },
       ];
 
-      return GridView.builder(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-          crossAxisCount: 3,
-          childAspectRatio: 1,
-          crossAxisSpacing: 16,
-          mainAxisSpacing: 16,
-        ),
-        itemCount: relations.length,
-        itemBuilder: (context, index) {
-          final relation = relations[index];
-          final value1 = relation['pokemon1'] as int;
-          final value2 = relation['pokemon2'] as int;
+      return LayoutBuilder(
+        builder: (context, constraints) {
+          final itemWidth = (constraints.maxWidth - 32) / 3;
+          return Wrap(
+            spacing: 16,
+            runSpacing: 16,
+            children: relations.map((relation) {
+              final value1 = relation['pokemon1'] as int;
+              final value2 = relation['pokemon2'] as int;
 
-          return Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade100,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey.shade300,
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(relation['icon'] as IconData, size: 24),
-                const SizedBox(height: 8),
-                Text(
-                  relation['name'] as String,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      '$value1',
-                      style: TextStyle(
-                        color: value1 > value2 ? Colors.green : Colors.black,
-                        fontWeight: FontWeight.bold,
+              return SizedBox(
+                width: itemWidth,
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.shade200,
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
                       ),
-                    ),
-                    const Text(' vs '),
-                    Text(
-                      '$value2',
-                      style: TextStyle(
-                        color: value2 > value1 ? Colors.orange : Colors.black,
-                        fontWeight: FontWeight.bold,
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(relation['icon'] as IconData, size: 24),
+                      const SizedBox(height: 4),
+                      Text(
+                        relation['name'] as String,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 13,
+                        ),
                       ),
-                    ),
-                  ],
+                      const SizedBox(height: 4),
+                      FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          '$value1 vs $value2',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w500,
+                            color: value1 != value2
+                                ? value1 > value2 ? Colors.green : Colors.orange
+                                : Colors.black,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ],
-            ),
+              );
+            }).toList(),
           );
         },
       );
     }
+
 
 
 
@@ -214,37 +212,64 @@ class EnhancedPokemonComparison extends StatefulWidget {
         },
       ];
 
-      return ListView.separated(
-        shrinkWrap: true,
-        physics: const NeverScrollableScrollPhysics(),
-        itemCount: details.length,
-        separatorBuilder: (context, index) => const SizedBox(height: 8),
-        itemBuilder: (context, index) {
-          final detail = details[index];
-          return Container(
-            padding: const EdgeInsets.all(16),
+      return Column(
+        children: details.map((detail) => Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              color: Colors.grey.shade100,
+              color: Colors.white,
               borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  detail['name'] as String,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-                Row(
-                  children: [
-                    Text(detail['pokemon1'] as String),
-                    const Text(' vs '),
-                    Text(detail['pokemon2'] as String),
-                  ],
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.shade200,
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
                 ),
               ],
             ),
-          );
-        },
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: Text(
+                    detail['name'] as String,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 3,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Text(
+                          detail['pokemon1'] as String,
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                        const Text(
+                          ' vs ',
+                          style: TextStyle(
+                            color: Colors.grey,
+                            fontSize: 14,
+                          ),
+                        ),
+                        Text(
+                          detail['pokemon2'] as String,
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        )).toList(),
       );
     }
 
@@ -282,7 +307,7 @@ class EnhancedPokemonComparison extends StatefulWidget {
 
     @override
     Widget build(BuildContext context) {
-      return Scaffold(  // Añadido Scaffold
+      return Scaffold(
         appBar: AppBar(
           title: const Text(
             'Comparar Pokémon',
@@ -481,10 +506,8 @@ class EnhancedPokemonComparison extends StatefulWidget {
     );
   }
 
-  // Agrega el resto de los métodos actualizados para usar los datos dinámicos de los Pokemon...
 
   Color _getTypeColor(String type) {
-    // Implementa los colores según el tipo de Pokémon
     final Map<String, Color> typeColors = {
       'normal': Colors.grey,
       'fire': Colors.orange,
