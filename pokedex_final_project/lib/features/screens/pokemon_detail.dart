@@ -6,6 +6,7 @@ import '../../core/models/pokemon_evolutions.dart';
 import '../../core/theme/pokemon_colors.dart';
 import '../../graphql/queries/pokemon_detail_by_id.dart';
 import '../pokemon/widgets/pokemon_card_share.dart';
+import '../pokemon/widgets/pokemon_evolution_chain.dart';
 import '../pokemon/widgets/pokemon_mega_evolutions.dart';
 import '../pokemon/widgets/pokemon_metric_card.dart';
 import '../pokemon/widgets/pokemon_moves_widget.dart';
@@ -531,58 +532,9 @@ class _PokemonDetailScreenState extends State<PokemonDetailScreen> with TickerPr
       return const SizedBox.shrink();
     }
 
-    // Detectar si es familia de Eevee (incluyendo Eevee y sus evoluciones)
-    bool isEeveeFamily = widget.pokemon.evolutions.any((e) => e.id == 133) ||
-        widget.pokemon.id == 133;
-
-    List<Color> gradientColors = widget.pokemon.types.length > 1
-        ? [
-      PokemonColors.getTypeColor(widget.pokemon.types[0].name),
-      PokemonColors.getTypeColor(widget.pokemon.types[1].name),
-    ]
-        : [
-      PokemonColors.getTypeColor(widget.pokemon.types[0].name).withOpacity(0.7),
-      PokemonColors.getTypeColor(widget.pokemon.types[0].name).withOpacity(0.3),
-    ];
-
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: gradientColors,
-        ),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Padding(
-            padding: EdgeInsets.only(left: 16, bottom: 16),
-            child: Center(
-              child: Text(
-                'Evoluciones',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ),
-          isEeveeFamily
-              ? _buildEeveeEvolutionsFamily()
-              : SizedBox(
-            height: 200,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: _buildEvolutionChain(),
-            ),
-          ),
-        ],
-      ),
+    return PokemonEvolutionChain(
+      evolutions: widget.pokemon.evolutions,
+      backgroundColor: PokemonColors.getTypeColor(widget.pokemon.types.first.name),
     );
   }
 
