@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:pokedex_final_project/features/screens/pokemon_comparation.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 import 'package:string_validator/string_validator.dart';
 import '../pokemon/widgets/favorites/favorite_pokemon_list.dart';
@@ -64,33 +65,60 @@ class _HomePageState extends State<HomePage> {
               backgroundColor: Colors.red,
               title: Padding(
                 padding: EdgeInsets.all(8.0),
-                child: Container(
-                  height: 40,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(15),
-                    color: Colors.white
-                  ),
-                  child: TextField(
-                    decoration: InputDecoration(
-                      hintText: "Search",
-                      hintStyle: TextStyle(color: Colors.grey),
-                      suffixIcon: Icon(Icons.search),
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Container(
+                        height: 40,
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(15),
+                            color: Colors.white
+                        ),
+                        child: TextField(
+                          decoration: InputDecoration(
+                            hintText: "Search",
+                            hintStyle: TextStyle(color: Colors.grey),
+                            suffixIcon: Icon(Icons.search),
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.symmetric(vertical: 10, horizontal: 10),
+                          ),
+                          onChanged: (String value) {
+                            setState(() {
+                              value = value.trim();
+                              if (isNumeric(value)){
+                                _searchNumber = int.parse(value);
+                                _searchName = '';
+                              } else {
+                                _searchName = value;
+                                _searchNumber = 0;
+                              }
+                            });
+                          },
+                        ),
+                      ),
                     ),
-                    onChanged: (String value) {
-                      setState(() {
-                        value = value.trim();
-                        if (isNumeric(value)){
-                          _searchNumber = int.parse(value);
-                          _searchName = '';
-                        } else {
-                          _searchName = value;
-                          _searchNumber = 0;
-                        }
-                      });
-                    },
-                  ),
+                    const SizedBox(width: 8),
+                    Container(
+                      height: 40,
+                      width: 40,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(15),
+                        color: Colors.white,
+                      ),
+                      child: IconButton(
+                        icon: const Icon(Icons.compare_arrows),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const PokemonComparisonScreen(),
+                            ),
+                          );
+                        },
+                        tooltip: 'Comparar Pokémon',
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
